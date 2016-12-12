@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static model.core.DMBase.*;
+import static model.core.DMData.*;
 import static model.core.DMField.*;
 /**
  * Created by dmkits on 30.11.2016.
@@ -40,13 +41,25 @@ public class MobiCashReportController extends PageController {
                 HashMap<String,String> params = getReqParams(req);
                 String sBDate = params.get("bdate");
                 String sEDate = params.get("edate");
-                String sTableName = "if_SelectCRBalance(1)";
+//                String sTableName = "if_SelectCRBalance(1)";
                 ArrayList<HashMap<String,Object>> res =
                         getSessionDBUS(session)
                                 .getDataListFromSQLQuery(
                                         "select * from if_SelectCRBalance(?,?,?)"
                                         ,new Object[]{1, sBDate, sEDate}
-                                        ,addStrParameter("ItemID","id", addStrParameter("ItemName","label", addStrParameter("SumCC","value"))) );
+                                        ,addStrParameter("ItemID","id",
+                                                addStrParameter("ItemName","label",
+                                                        addStrParameter("SumCC","value"))) );
+                res.add(0,
+                        DMMetadata.newMetadata("t_Sale", "ChID", ftype_INTEGER)
+                                .cloneWithoutFields()
+                                .addFieldFunction("value", FUNC_SUMNOTNULL, null, "TSumCC_wt")
+                                .addWhereCondition("DocDate", ">=", sBDate)
+                                .addWhereCondition("DocDate", "<=", sEDate)
+                                .selectList(getSessionDBUS(session))
+                                .putToSelectResultItemValue("id", 0)
+                                .putToSelectResultItemValue("label","Реализация")
+                                .getSelectResultItemValues() );
                 outData.put("cashbalance",res);
             } catch (Exception e){
                 outData.put("error",e.getLocalizedMessage());

@@ -185,6 +185,14 @@ public class DMMetadata extends DMSQLQueryMetadata {
             throw new DataModelException("Failed do getSelectResultItemValue! Reason: select result item contains more that one values!");
         return selectResultItem.values().toArray()[0];
     }
+    public DMMetadata putToSelectResultItemValue(String itemName, Object value) throws DataModelException {
+        if (selectResult==null) selectResult = new ArrayList<>();
+        if (selectResult.size()==0) selectResult.add(new HashMap<String, Object>());
+        if (selectResult.size()>1)
+            throw new DataModelException("Failed do getSelectResultItemValue! Reason: select result contains more that one items!");
+        selectResult.get(0).put(itemName, value);
+        return this;
+    }
 
     public DMMetadata putIDNameTo(HashMap recipient, String itemName) throws DataModelException {
         recipient.put(itemName,getKeyFieldPublicName());

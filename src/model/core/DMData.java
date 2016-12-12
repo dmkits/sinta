@@ -2,6 +2,7 @@ package model.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created by dmkits on 02.12.16.
@@ -55,5 +56,9 @@ public class DMData {
     public DMData putDataListTo(HashMap outData, String itemName){
         outData.put(itemName, dataList);
         return this;
+    }
+
+    public static void putValueTo(HashMap outData, String itemName, Object value){
+        outData.put(itemName,value);
     }
 }
