@@ -1,6 +1,7 @@
 package controllers.mobile;
 
 import controllers.PageController;
+import model.core.DMData;
 import model.core.DMMetadata;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,12 +59,29 @@ public class MobiCashReportController extends PageController {
                                 .addWhereCondition("DocDate", "<=", sEDate)
                                 .selectList(getSessionDBUS(session))
                                 .putToSelectResultItemValue("id", 0)
-                                .putToSelectResultItemValue("label","Реализация")
-                                .getSelectResultItemValues() );
+                                .putToSelectResultItemValue("label", "Реализация")
+                                .putToSelectResultItemValue("url", "/mobile")
+                                .putToSelectResultItemValue("action", "get_sales")
+                                .getSelectResultItemValues());
                 outData.put("cashbalance",res);
             } catch (Exception e){
                 outData.put("error",e.getLocalizedMessage());
             }
+        } else if(sAction.equals("get_sales")){
+            HashMap<String,String> params = getReqParams(req);
+            String sBDate = params.get("bdate");
+            String sEDate = params.get("edate");
+            DMMetadata.newMetadata("t_Sale", "ChID", ftype_INTEGER)
+                    .cloneWithFields()
+                    .joinSource("t_SaleD", "ChID", "t_Sale", "ChID")
+                    .joinSource("r_Prods","ProdID","t_SaleD", "ProdID")
+                    .joinSource("r_ProdG3", "PGrID3", "r_Prods", "PGrID3")
+                    .addGroupedField("label", "r_ProdG3", "PGrName3")
+                    .addFieldFunction("value", FUNC_SUMNOTNULL, "t_SaleD", "SumCC_wt")
+                    .addWhereCondition("DocDate", ">=", sBDate)
+                    .addWhereCondition("DocDate", "<=", sEDate)
+                    .selectList(getSessionDBUS(session))
+                    .putResultListTo(outData,"items");
         } else return false;
         return true;
     }

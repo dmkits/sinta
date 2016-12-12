@@ -142,6 +142,7 @@
                             }
                             , function (success, result) {
                                 if (success) {
+                                    if (result.error) console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
                                     view_main.setDetailContent(result);
                                 } else {
                                     //error!!!
@@ -180,9 +181,10 @@
                         }
                         if (dataItem.url) {
                             list_item.url = dataItem.url;
+                            list_item.actionValue = dataItem.action;
                             list_item.onClick = function () {
                                 this.set("selected", "false");
-                              var view=  view_main.showDetailView(view_main.first_header_string + " - " + this.label, "view_" + this.id, list_item.url);
+                              var view=  view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url,this.actionValue);
                             }
                         }
                         if (!dataItem.url) {
@@ -314,7 +316,7 @@
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
                     }
                 };
-                view_main.showDetailView = function (heading_label, id, url) {
+                view_main.showDetailView = function (heading_label, id, url, actionValue) {
                     var view = registry.byId(id);
                     if (!view) {
                         var view_div = document.createElement("div");
@@ -345,16 +347,19 @@
                                 unit_params = "unit" + i + "=id:" + units_list[i].id;
                                 unit_params = (unit_params === null) ? "" : "&" + unit_params;
                             }
+
+
                                                                                                 console.log("view.url=",view.url);
                             getJSONData({
                                         //  url: "mobile/cashin_sum.json"
                                         url:view.url,
-                                        condition: "action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                        condition: "action="+actionValue+"&bdate=" + bdate + "&edate=" + edate + unit_params,
                                         consoleLog: true
                                     }
                                     , function (success, result) {
-                                        if (success) {
-                                            view.setDetailContent(result);
+                                        if (success) {                                                              //console.log("view.loadDetailContent getJSONData result.items=",result.items);
+                                            if (result.error) console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                            view.setDetailContent(result.items);
                                         } else {
                                             alert("Нет данных");
 
@@ -364,7 +369,7 @@
                         };
 
                     }
-                    view.setDetailContent = function (data) {
+                    view.setDetailContent = function (data) {                                               console.log("view.setDetailContent view.id="+this.id+" data=",data);
                         // var data;
                         var list_items = registry.byId("list" + this.id);
                         if (list_items) {
@@ -372,7 +377,7 @@
                         }
                         list_items = new roundRectList({"id": "list" + this.id});
                         this.addChild(list_items, 3);
-                        list_items.startup();
+                        //list_items.startup();
 
                         /*
                          [
@@ -388,8 +393,8 @@
                             var string_sum = numeral(dataItem.sum).format('0,0');
                             var item = new ListItem({
                                 style: "background-color:white",
-                                label: dataItem.date,
-                                rightText: string_sum
+                                label: dataItem.label,
+                                rightText: dataItem.value
                             });
                             list_items.addChild(item);
                         }
