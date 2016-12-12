@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="sa_syncronization_PageContainer" style="width:100%;height:100%;">
+    <div id="sa_syncronization_PageTopContent" style="width:100%;height:auto; margin:0;padding:0;">
+        <table width="100%">
+            <!--<tr><td height="20px">-->
+                <!--<table width="100%">-->
+                    <!--<tr><th height="30px" width="100px"><b>Database:</b></th><th><div id="sa_syncronization_CurrDBConn"></div></th></tr>-->
+                <!--</table>-->
+            <!--</td></tr>-->
+            <tr><td height="1px">
+                <table width="100%">
+                    <tr><td width="150px"><b>Syncronization state:</b> <td><div id="sa_syncronization_DBSyncronizationState"></div></td></tr>
+                </table>
+            </td></tr>
+            <tr><td height="30px">
+                <button id="sa_syncronization_BtnGetSyncErrorLog">Get sync error log</button>
+                <button id="sa_syncronization_BtnGetIncomingSyncData">Get incoming sync data</button>
+                <button id="sa_syncronization_BtnGetOutputSyncData">Get output sync data</button>
+                <button id="sa_syncronization_BtnSyncDatabases">Syncronization databases</button>
+            </td></tr>
+        </table>
+    </div>
+    <div id="sa_syncronization_ContentContainer" style="width:100%;height:auto;margin:0;padding:0;">
+
+        <div id="sa_syncronization_ContentErrorLog" style="width:100%;height:100%;margin:0;padding:0;">
+            <div id="sa_syncronization_ContentErrorLogTopPane" style="width:100%;height:auto;margin:0;padding:0;">
+                <table style="width:100%;height:100%;">
+                    <tr><th>Syncronization error log</th></tr>
+                    <tr><td width="100%" height="25px">
+                        <label for="sa_syncronization_elog_bdate">с </label><input id="sa_syncronization_elog_bdate" type="text"/>
+                        <label for="sa_syncronization_elog_edate">по </label><input id="sa_syncronization_elog_edate" type="text"/>
+                    </td></tr>
+                    <tr><td width="100%" height="25px"><div id="sa_syncronization_ErrLogInf"></div></td></tr>
+                </table>
+            </div>
+            <div id="sa_syncronization_htSyncErrorLog" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        </div>
+
+        <div id="sa_syncronization_ContentIncData" style="width:100%;height:100%;margin:0;padding:0;">
+            <div id="sa_syncronization_ContentIncDataTopPane" style="width:100%;height:auto;margin:0;padding:0;">
+                <table style="width:100%;height:100%;">
+                    <tr><th>Incoming syncronization data</th></tr>
+                    <tr><td width="100%" height="25px">
+                        <label for="sa_syncronization_incdata_bdate">с </label><input id="sa_syncronization_incdata_bdate" type="text"/>
+                        <label for="sa_syncronization_incdata_edate">по </label><input id="sa_syncronization_incdata_edate" type="text"/>
+                    </td></tr>
+                    <tr><td width="100%" height="25px"><div id="sa_syncronization_IncDataInf"></div></td></tr>
+                </table>
+            </div>
+            <div id="sa_syncronization_htSyncIncData" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        </div>
+        <div id="sa_syncronization_ContentOutData" style="width:100%;height:100%;margin:0;padding:0;">
+            <div id="sa_syncronization_ContentOutDataTopPane" style="width:100%;height:auto;margin:0;padding:0;">
+                <table style="width:100%;height:100%;">
+                    <tr><th>Outputing syncronization data</th></tr>
+                    <tr><td width="100%" height="25px">
+                        <label for="sa_syncronization_outdata_bdate">с </label><input id="sa_syncronization_outdata_bdate" type="text"/>
+                        <label for="sa_syncronization_outdata_edate">по </label><input id="sa_syncronization_outdata_edate" type="text"/>
+                    </td></tr>
+                    <tr><td width="100%" height="25px"><div id="sa_syncronization_OutDataInf"></div></td></tr>
+                </table>
+            </div>
+            <div id="sa_syncronization_htSyncOutData" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        </div>
+        <div id="sa_syncronization_ContentDBData" style="width:100%;height:100%;margin:0;padding:0;">
+            <div id="sa_syncronization_ContentDBDataTopPane" style="width:100%;height:auto;margin:0;padding:0;">
+                <table style="width:100%;height:100%;">
+                    <tr><th>Syncronization databases</th></tr>
+                    <tr><td width="100%" height="25px"><div id="sa_syncronization_DBDataInf"></div></td></tr>
+                </table>
+            </div>
+            <div id="sa_syncronization_htSyncDBData" style="width:100%;height:auto;margin:0;padding:0;"></div>
+        </div>
+    </div>
+    <div id="sa_syncronization_PageRightContent" style="width:300px;height:100%; margin:0;padding:0;">
+        <div id="sa_syncronization_PageRightContentItemData"></div>
+        <div id="sa_syncronization_PageRightContentItemDetails"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/StackContainer", "dijit/layout/ContentPane",
+                "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button", "htable"],
+            function (registry, BorderContainer, LayoutContainer, StackContainer, ContentPane, TextBox,DateTextBox, Button, htable) {
+                var sa_syncronization_PageContainer = initElem(registry, "sa_syncronization_PageContainer", "sa_syncronization_PageContainer", BorderContainer, {});
+                initElem(registry, "sa_syncronization_PageTopContent", "sa_syncronization_PageTopContent", ContentPane, {region:'top'});
+                var sa_syncronization_BtnGetSyncErrorLog=initElem(registry, "sa_syncronization_BtnGetSyncErrorLog", "sa_syncronization_BtnGetSyncErrorLog", Button, {style:"width:150px"});
+                var sa_syncronization_BtnGetIncomingSyncData=initElem(registry, "sa_syncronization_BtnGetIncomingSyncData", "sa_syncronization_BtnGetIncomingSyncData", Button, {style:"width:150px"});
+                var sa_syncronization_BtnGetOutputSyncData=initElem(registry, "sa_syncronization_BtnGetOutputSyncData", "sa_syncronization_BtnGetOutputSyncData", Button, {style:"width:160px"});
+                var sa_syncronization_BtnSyncDatabases=initElem(registry, "sa_syncronization_BtnSyncDatabases", "sa_syncronization_BtnSyncDatabases", Button, {style:"width:200px"});
+                var sa_syncronization_ContentContainer = initElem(null, "sa_syncronization_ContentContainer", "sa_syncronization_ContentContainer",
+                        StackContainer, {region: "center", tabPosition: "top", class: "sysadmin_Content"});
+
+                var sa_syncronization_ContentErrorLog = initElem(registry, "sa_syncronization_ContentErrorLog", "sa_syncronization_ContentErrorLog", LayoutContainer, {});
+                initElem(registry, "sa_syncronization_ContentErrorLogTopPane", "sa_syncronization_ContentErrorLogTopPane", ContentPane, {region:'top'});
+                var sa_syncronization_elog_bdate=initElem(registry, "sa_syncronization_elog_bdate", "sa_syncronization_elog_bdate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_elog_edate=initElem(registry, "sa_syncronization_elog_edate", "sa_syncronization_elog_edate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_htSyncErrorLog= initElem(registry, "sa_syncronization_htSyncErrorLog", "sa_syncronization_htSyncErrorLog",
+                        htable, {region:'center', getURL:"/sysadmin/syncronization", useFilters:true, readOnly:true,htaddRows:0,wordWrap:true});
+
+                var sa_syncronization_ContentIncData = initElem(registry, "sa_syncronization_ContentIncData", "sa_syncronization_ContentIncData", LayoutContainer, {});
+                initElem(registry, "sa_syncronization_ContentIncDataTopPane", "sa_syncronization_ContentIncDataTopPane", ContentPane, {region:'top'});
+                var sa_syncronization_incdata_bdate=initElem(registry, "sa_syncronization_incdata_bdate", "sa_syncronization_incdata_bdate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_incdata_edate=initElem(registry, "sa_syncronization_incdata_edate", "sa_syncronization_incdata_edate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_htSyncIncData= initElem(registry, "sa_syncronization_htSyncIncData", "sa_syncronization_htSyncIncData",
+                        htable, {region:'center', getURL:"/sysadmin/syncronization", useFilters:true, readOnly:true,htaddRows:0,wordWrap:true});
+                var sa_syncronization_ContentOutData = initElem(registry, "sa_syncronization_ContentOutData", "sa_syncronization_ContentOutData", LayoutContainer, {});
+                initElem(registry, "sa_syncronization_ContentOutDataTopPane", "sa_syncronization_ContentOutDataTopPane", ContentPane, {region:'top'});
+                var sa_syncronization_outdata_bdate=initElem(registry, "sa_syncronization_outdata_bdate", "sa_syncronization_outdata_bdate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_outdata_edate=initElem(registry, "sa_syncronization_outdata_edate", "sa_syncronization_outdata_edate", DateTextBox, {style:"width:80px"});
+                var sa_syncronization_htSyncOutData= initElem(registry, "sa_syncronization_htSyncOutData", "sa_syncronization_htSyncOutData",
+                        htable, {region:'center', getURL:"/sysadmin/syncronization", useFilters:true, readOnly:true,htaddRows:0,wordWrap:true});
+                var sa_syncronization_ContentDBData = initElem(registry, "sa_syncronization_ContentDBData", "sa_syncronization_ContentDBData", LayoutContainer, {});
+                initElem(registry, "sa_syncronization_ContentDBDataTopPane", "sa_syncronization_ContentDBDataTopPane", ContentPane, {region:'top'});
+                var sa_syncronization_htSyncDBData= initElem(registry, "sa_syncronization_htSyncDBData", "sa_syncronization_htSyncDBData",
+                        htable, {region:'center', getURL:"/sysadmin/syncronization", useFilters:true, readOnly:true,htaddRows:0,wordWrap:true});
+                var sa_syncronization_PageRightContent= initElem(registry, "sa_syncronization_PageRightContent", "sa_syncronization_PageRightContent", ContentPane, {region:'right'});
+                /*---actions---*/
+                sa_syncronization_BtnGetSyncErrorLog.onClick = function(){
+                    sa_syncronization_ContentContainer.selectChild("sa_syncronization_ContentErrorLog",true);
+                };
+                sa_syncronization_BtnGetIncomingSyncData.onClick = function(){
+                    sa_syncronization_ContentContainer.selectChild("sa_syncronization_ContentIncData",true);
+                };
+                sa_syncronization_BtnGetOutputSyncData.onClick = function(){
+                    sa_syncronization_ContentContainer.selectChild("sa_syncronization_ContentOutData",true);
+                };
+                sa_syncronization_BtnSyncDatabases.onClick = function(){
+                    sa_syncronization_ContentContainer.selectChild("sa_syncronization_ContentDBData",true);
+                };
+
+                sa_syncronization_ContentErrorLog.onShow = function(){
+                    if (!sa_syncronization_elog_bdate.get("value")) sa_syncronization_elog_bdate.set("value",today(),false);
+                    if (!sa_syncronization_elog_edate.get("value")) sa_syncronization_elog_edate.set("value",today(),false);
+                    var edate = sa_syncronization_elog_edate.get("value");
+                    edate.setHours(23); edate.setMinutes(59); edate.setSeconds(59);
+                    var sbdate= sa_syncronization_elog_bdate.format(sa_syncronization_elog_bdate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"}),
+                            sedate= sa_syncronization_elog_edate.format(edate,{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"});
+                    var condition="";
+                    if(sbdate) condition="&BDATE="+sbdate;
+                    if(sedate) condition=condition+"&EDATE="+sedate;
+                    sa_syncronization_htSyncErrorLog.loadContentFromUrl("action=get_sync_error_log"+condition,
+                            /*posaction*/function(success,result){
+                                var sa_syncronization_ErrLogInf= document.getElementById("sa_syncronization_ErrLogInf");
+                                if(success==true){
+                                    var actionText= "";
+                                    var itemsCount, resultItems=result["items"];
+                                    if (resultItems) itemsCount=resultItems.length;
+                                    if(itemsCount&&itemsCount>0) actionText="<b>Founded "+itemsCount+" syncronization error log items.</b>";
+                                    else if(itemsCount!==undefined&&itemsCount==0)  actionText="<b>No syncronization error log items.</b>";
+                                    else actionText="<b style='color:red;'>No data!</b>";
+                                    sa_syncronization_ErrLogInf.innerHTML = actionText;
+                                } else {
+                                    sa_syncronization_ErrLogInf.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                            });
+                };
+                sa_syncronization_elog_bdate.onChange = function() { sa_syncronization_ContentErrorLog.onShow(); };
+                sa_syncronization_elog_edate.onChange = function() { sa_syncronization_ContentErrorLog.onShow(); };
+
+                sa_syncronization_ContentIncData.onShow = function(){
+                    if (!sa_syncronization_incdata_bdate.get("value")) sa_syncronization_incdata_bdate.set("value",today(),false);
+                    if (!sa_syncronization_incdata_edate.get("value")) sa_syncronization_incdata_edate.set("value",today(),false);
+                    var edate = sa_syncronization_incdata_edate.get("value");
+                    edate.setHours(23); edate.setMinutes(59); edate.setSeconds(59);
+                    var sbdate= sa_syncronization_incdata_bdate.format(sa_syncronization_incdata_bdate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"}),
+                            sedate= sa_syncronization_incdata_edate.format(edate,{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"});
+                    var condition="";
+                    if(sbdate) condition="&BDATE="+sbdate;
+                    if(sedate) condition=condition+"&EDATE="+sedate;
+                    sa_syncronization_htSyncIncData.loadContentFromUrl("action=get_sync_incoming_data"+condition,
+                            /*posaction*/function(success,result){
+                                var sa_syncronization_IncDataInf= document.getElementById("sa_syncronization_IncDataInf");
+                                if(success==true){
+                                    var actionText= "";
+                                    var itemsCount, resultItems=result["items"];
+                                    if (resultItems) itemsCount=resultItems.length;
+                                    if(itemsCount&&itemsCount>0) actionText="<b>Founded "+itemsCount+" incoming syncronization items.</b>";
+                                    else if(itemsCount!==undefined&&itemsCount==0)  actionText="<b>No incoming syncronization items.</b>";
+                                    else actionText="<b style='color:red;'>No data!</b>";
+                                    sa_syncronization_IncDataInf.innerHTML = actionText;
+                                } else {
+                                    sa_syncronization_IncDataInf.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                            });
+                };
+                sa_syncronization_incdata_bdate.onChange = function() { sa_syncronization_ContentIncData.onShow(); };
+                sa_syncronization_incdata_edate.onChange = function() { sa_syncronization_ContentIncData.onShow(); };
+                sa_syncronization_htSyncIncData.onSelect = function(rowIndex, rowIDVal, rowDataValues){
+                    this.setSelectionByID(rowIDVal);
+                    sa_syncronization_PageRightContent.viewSyncIncDataDetail(rowDataValues);
+                };
+
+                sa_syncronization_ContentOutData.onShow = function(){
+                    if (!sa_syncronization_outdata_bdate.get("value")) sa_syncronization_outdata_bdate.set("value",today(),false);
+                    if (!sa_syncronization_outdata_edate.get("value")) sa_syncronization_outdata_edate.set("value",today(),false);
+                    var edate = sa_syncronization_outdata_edate.get("value");
+                    edate.setHours(23); edate.setMinutes(59); edate.setSeconds(59);
+                    var sbdate= sa_syncronization_outdata_bdate.format(sa_syncronization_outdata_bdate.get("value"),{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"}),
+                            sedate= sa_syncronization_outdata_edate.format(edate,{selector:"date",datePattern:"yyyy-MM-dd HH:mm:ss"});
+                    var condition="";
+                    if(sbdate) condition="&BDATE="+sbdate;
+                    if(sedate) condition=condition+"&EDATE="+sedate;
+                    sa_syncronization_htSyncOutData.loadContentFromUrl("action=get_sync_output_data"+condition,
+                            /*posaction*/function(success,result){
+                                var sa_syncronization_OutDataInf= document.getElementById("sa_syncronization_OutDataInf");
+                                if(success==true){
+                                    var actionText= "";
+                                    var itemsCount, resultItems=result["items"];
+                                    if (resultItems) itemsCount=resultItems.length;
+                                    if(itemsCount&&itemsCount>0) actionText="<b>Founded "+itemsCount+" output syncronization items.</b>";
+                                    else if(itemsCount!==undefined&&itemsCount==0)  actionText="<b>No output syncronization items.</b>";
+                                    else actionText="<b style='color:red;'>No data!</b>";
+                                    sa_syncronization_OutDataInf.innerHTML = actionText;
+                                } else {
+                                    sa_syncronization_OutDataInf.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                            });
+                };
+                sa_syncronization_outdata_bdate.onChange = function() { sa_syncronization_ContentOutData.onShow(); };
+                sa_syncronization_outdata_edate.onChange = function() { sa_syncronization_ContentOutData.onShow(); };
+                sa_syncronization_htSyncOutData.onSelect = function(rowIndex, rowIDVal, rowDataValues){
+                    this.setSelectionByID(rowIDVal);
+                    sa_syncronization_PageRightContent.viewSyncOutDataDetail(rowDataValues);
+                };
+
+                sa_syncronization_ContentDBData.onShow = function(){
+                    var sa_syncronization_DBDataInf= document.getElementById("sa_syncronization_DBDataInf");
+                    sa_syncronization_htSyncDBData.loadContentFromUrl("action=get_sync_databases",
+                            /*posaction*/function(success,result){
+                                var sa_syncronization_OutDataInf= document.getElementById("sa_syncronization_OutDataInf");
+                                if(success==true){
+                                    var actionText= "";
+                                    var itemsCount, resultItems=result["items"];
+                                    if (resultItems) itemsCount=resultItems.length;
+                                    if(itemsCount&&itemsCount>0) actionText="<b>Founded "+itemsCount+" items.</b>";
+                                    else if(itemsCount!==undefined&&itemsCount==0)  actionText="<b>No items.</b>";
+                                    else actionText="<b style='color:red;'>No data!</b>";
+                                    sa_syncronization_DBDataInf.innerHTML = actionText;
+                                } else {
+                                    sa_syncronization_DBDataInf.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                            });
+                };
+
+                sa_syncronization_PageRightContent.viewSyncIncDataDetail = function (rowDataValues) {
+                    if(rowDataValues===null||rowDataValues===undefined) return;
+                    var itemData = "";
+                    var clientDataID = rowDataValues["CLIENT_DATA_ID"];
+                    if (clientDataID!==undefined&&clientDataID!==null) itemData= "<br>"+"CLIENT_DATA_ID: "+"<b>"+rowDataValues["CLIENT_DATA_ID"]+"</b>";
+                    var tableName = rowDataValues["TABLE_NAME"];
+                    if (tableName!==undefined&&tableName!==null) itemData= itemData+"<br>"+"TABLE_NAME: "+"<b>"+rowDataValues["TABLE_NAME"]+"</b>";
+                    document.getElementById("sa_syncronization_PageRightContentItemData").innerHTML= itemData+"<br>";
+                    var idCondition="&SYNC_INCOMING_DATA_ID="+rowDataValues["ID"];
+                    getJSONData({url:"/sysadmin/syncronization", condition:"action=get_sync_incoming_data_details"+idCondition, consoleLog:true},
+                            function(success, result){
+                                if(success){
+                                    var dataItems= result["items"];
+                                    var detailData= "";
+                                    for(var item in dataItems){
+                                        var itemData= dataItems[item];
+                                        detailData= detailData+"<br>";
+                                        detailData= detailData+ itemData["NAME"]+": <b>"+itemData["VALUE"]+"</b>";
+                                    }
+                                    document.getElementById("sa_syncronization_PageRightContentItemDetails").innerHTML= detailData;
+                                }
+                            });
+                };
+                sa_syncronization_PageRightContent.viewSyncOutDataDetail = function (rowDataValues) {
+                    if(rowDataValues===null||rowDataValues===undefined) return;
+                    var itemData = "";
+                    var clientDataID = rowDataValues["CLIENT_DATA_ID"];
+                    if (clientDataID!==undefined&&clientDataID!==null) itemData= itemData+"<br>"+"CLIENT_DATA_ID: "+"<b>"+clientDataID+"</b>";
+                    var tableName = rowDataValues["TABLE_NAME"];
+                    if (tableName!==undefined&&tableName!==null) itemData= itemData+"<br>"+"TABLE_NAME: "+"<b>"+tableName+"</b>";
+                    document.getElementById("sa_syncronization_PageRightContentItemData").innerHTML= itemData+"<br>";
+                    var idCondition="&SYNC_OUTPUT_DATA_ID="+rowDataValues["ID"];
+                    getJSONData({url:"/sysadmin/syncronization", condition:"action=get_sync_output_data_details"+idCondition, consoleLog:true},
+                            function(success, result){
+                                if(success){
+                                    var dataItems= result["items"];
+                                    var detailData= "";
+                                    for(var item in dataItems){
+                                        var itemData= dataItems[item];
+                                        detailData= detailData+"<br>";
+                                        detailData= detailData+ itemData["NAME"]+": <b>"+itemData["VALUE"]+"</b>";
+                                    }
+                                    document.getElementById("sa_syncronization_PageRightContentItemDetails").innerHTML= detailData;
+                                }
+                            });
+                };
+                /*---initing on load---*/
+                sa_syncronization_PageContainer.layout();
+                sa_syncronization_BtnGetSyncErrorLog.onClick();
+            });
+</script>
+</html>

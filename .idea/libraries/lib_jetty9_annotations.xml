@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="lib_jetty9_annotations">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/annotations/asm-5.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/annotations/asm-commons-5.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/annotations/javax.annotation-api-1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Oct 11 19:49:08 EEST 2016:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.1 - (1616546): instance a816c00e-0157-b4a5-cca9-000004184f78 
+on database directory /home/dmkits/bata.prj/bata.iprj/db/bata1 with class loader sun.misc.Launcher$AppClassLoader@18b4aac2 
+Loaded from file:/home/dmkits/bata.prj/bata.iprj/lib/db/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_91-8u91-b14-3ubuntu1~16.04.1-b14
+user.dir=/home/dmkits/bata.prj/bata.iprj
+os.name=Linux
+os.arch=amd64
+os.version=4.4.0-42-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

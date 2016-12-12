@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Class-Path: lib/db/derby.jar lib/db/derbyclient.jar lib/db/sqljdbc4-3.
+ 0.jar lib/gson-2.5.jar lib/jaxm-api.jar lib/log4j-1.2.16.jar lib_jett
+ y9/annotations/asm-5.0.1.jar lib_jetty9/annotations/asm-commons-5.0.1
+ .jar lib_jetty9/annotations/javax.annotation-api-1.2.jar lib_jetty9/j
+ sp/javax.el-3.0.0.jar lib_jetty9/jsp/javax.servlet.jsp.jstl-1.2.2.jar
+  lib_jetty9/jsp/javax.servlet.jsp-2.3.2.jar lib_jetty9/jsp/javax.serv
+ let.jsp-api-2.3.1.jar lib_jetty9/jsp/jetty-jsp-9.2.11.v20150529.jar l
+ ib_jetty9/jsp/jetty-jsp-jdt-2.3.3.jar lib_jetty9/jsp/org.eclipse.jdt.
+ core-3.8.2.v20130121.jar lib_jetty9/jsp/org.eclipse.jetty.orbit.javax
+ .servlet.jsp.jstl-1.2.0.v201105211821.jar lib_jetty9/jetty-alpn-clien
+ t-9.2.11.v20150529.jar lib_jetty9/jetty-alpn-server-9.2.11.v20150529.
+ jar lib_jetty9/jetty-annotations-9.2.11.v20150529.jar lib_jetty9/jett
+ y-cdi-9.2.11.v20150529.jar lib_jetty9/jetty-client-9.2.11.v20150529.j
+ ar lib_jetty9/jetty-continuation-9.2.11.v20150529.jar lib_jetty9/jett
+ y-deploy-9.2.11.v20150529.jar lib_jetty9/jetty-http-9.2.11.v20150529.
+ jar lib_jetty9/jetty-io-9.2.11.v20150529.jar lib_jetty9/jetty-jaas-9.
+ 2.11.v20150529.jar lib_jetty9/jetty-jaspi-9.2.11.v20150529.jar lib_je
+ tty9/jetty-jmx-9.2.11.v20150529.jar lib_jetty9/jetty-jndi-9.2.11.v201
+ 50529.jar lib_jetty9/jetty-plus-9.2.11.v20150529.jar lib_jetty9/jetty
+ -proxy-9.2.11.v20150529.jar lib_jetty9/jetty-quickstart-9.2.11.v20150
+ 529.jar lib_jetty9/jetty-rewrite-9.2.11.v20150529.jar lib_jetty9/jett
+ y-schemas-3.1.jar lib_jetty9/jetty-security-9.2.11.v20150529.jar lib_
+ jetty9/jetty-server-9.2.11.v20150529.jar lib_jetty9/jetty-servlet-9.2
+ .11.v20150529.jar lib_jetty9/jetty-servlets-9.2.11.v20150529.jar lib_
+ jetty9/jetty-util-9.2.11.v20150529.jar lib_jetty9/jetty-webapp-9.2.11
+ .v20150529.jar lib_jetty9/jetty-xml-9.2.11.v20150529.jar lib_jetty9/s
+ ervlet-api-3.1.jar
+Main-Class: webserver.StartOnJetty
+

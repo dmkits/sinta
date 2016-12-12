@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<!--xmlns="http://www.w3.org/1999/xhtml"-->
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="/icons/heart16.ico"/>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+    <!--<meta name="apple-mobile-web-app-capable" content="yes"/>-->
+
+    <link href="/jslib/dojox/mobile/themes/iphone/iphone.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/jslib/dojox/widget/Calendar/Calendar.css">
+    <link rel="stylesheet" href="/jslib/dojox/calendar/themes/claro/Calendar.css">
+    <link href="/jslib/dijit/themes/claro/claro.css" rel="stylesheet" type="text/css">
+    <!--<script type="text/javascript" src="/jslib/dojox/mobile/deviceTheme.js"></script>-->
+    <script src="/jslib/myutils.js"></script>
+    <script src="/jslib/mainutils.js"></script>
+    <script src="/jslib/handsontable/moment/moment-with-locales.js"></script>
+    <script src="/jslib/handsontable/numeral/numeral.js"></script>
+    <script src="/jslib/handsontable/numeral/languages/ru-UA.js"></script>
+    <script src="/jslib/dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
+    <!--<script src="/jslib/dijit/dijit.js"></script>-->
+
+    <title></title>
+    <style>
+        .claro table.dijitCalendarContainer {
+            margin: 25px auto;
+        }
+
+        .mblTooltipBubble {
+            overflow: visible;
+            padding: 3px;
+        . mblTooltipBubble-styles;
+        }
+
+        #date_picker {
+            text-align: center;
+            position: relative;
+            font-size: 1.5em;
+            font-weight: lighter;
+        }
+    </style>
+</head>
+<body id="body" class="claro">
+<div id="view_main">
+    <!--<div id="heading_main"></div>-->
+    <!--<ul id="view_main_list_items"></ul>-->
+</div>
+</body>
+<script>
+    require(["dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
+                "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
+                "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer", "dojox/mobile/ToggleButton"],
+
+            function (mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
+                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton) {
+                moment.locale("uk");
+                numeral.language('ru-UA');
+
+                var view_main = new View({id: "view_main"}, "view_main");
+                view_main.top_heading_main = new Heading({
+                    //                   label
+                }, "top_heading_main");
+                view_main.addChild(view_main.top_heading_main, 0);
+                var pickUnitBtnHeading = new Heading({});
+                var icon_btn = new ToolBarButton({
+                    preventTouch: true,
+                    clickable: false,
+                    icon: "/icons/hearts29x29.ico",
+                    iconPos: "0,0,29,29"
+                });
+                pickUnitBtnHeading.addChild(icon_btn);
+                view_main.addChild(pickUnitBtnHeading, 1);
+
+                var v = window.innerWidth - 90;
+                view_main.pickUnitBtn = new ToolBarButton({
+                    style: "width:" + v + "px; font-size:14px; align: center",
+                    transition: "fade",
+                    moveTo: "view_main_pick_unit",
+                    onClick: function () {
+                        showPickUnitView(this, view_main)
+                    }
+                });
+                window.onresize = function () {
+                    v = window.innerWidth - 90;
+                    view_main.pickUnitBtn.set("style", "width:" + v + "px; font-size:14px; align: center");
+                };
+                pickUnitBtnHeading.addChild(view_main.pickUnitBtn);
+                view_main.startup();
+
+                /*{
+                 "head": "Магазины",
+                 "units":[
+                 { "id": "Bata1", "short_name": "Bata1", "name": "Магазин  БАТА1" }
+                 ,{ "id": "Bata2", "short_name": "Bata2", "name": "Магазин БАТА2" } ]
+                 }*/
+                view_main.loadMainContent = function () {
+                    getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true}
+                            , function (success, result) {
+                                console.log("view_main.loadMainContent getJSONData ", result);
+                                if (success) {
+                                    view_main.setMainContent(result);
+                                } else {
+                                    //error!!!
+                                    view_main.setMainContent({"head": "Нет данных", "units": []});
+                                }
+                            }
+                    );
+                };
+                view_main.setMainContent = function (maindata) {
+                    view_main.first_header_string = maindata.head;
+                    view_main.top_heading_main.set("label", view_main.first_header_string);
+
+                    view_main.pickUnitBtn.units_data = maindata.units;
+                    view_main.pickUnitBtn.selected_units = [];
+                    view_main.pickUnitBtn.selected_units[0] = view_main.pickUnitBtn.units_data[0];
+                    view_main.string_units = view_main.pickUnitBtn.selected_units[0].short_name;
+                    view_main.pickUnitBtn.set("label", view_main.string_units);
+
+                    view_main.createTopButtonsFor(view_main);
+                    view_main.createBottomButtonsFor(view_main);
+
+                    if (view_main.btnBeginDate.label === '') view_main.todayBtn.onClick();
+                    //   view_main.btnBeginDate_dateValue, view_main.btnEndDate_dateValue
+                    //          20161001    201610131
+                    //  var cashbalance = loadMobileDataFromServer("/mobile?action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params);
+                };
+                view_main.loadDetailContent = function () {
+                    console.log("LoadDetailContent");
+                    var bdate = view_main.btnBeginDate_dateValue.format("YYYYMMDD");
+                    var edate = view_main.btnEndDate_dateValue.format("YYYYMMDD");
+                    var unit_params = null;
+                    var units_list = view_main.pickUnitBtn.selected_units;
+                    for (var i in units_list) {
+                        unit_params = "unit_id_" + i + "=" + units_list[i].id;
+                        unit_params = (unit_params === null) ? "" : "&" + unit_params;
+                    }
+                    getJSONData({
+                                url: "/mobile",
+                                condition: "action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                consoleLog: true
+                            }
+                            , function (success, result) {
+                                if (success) {
+                                    view_main.setDetailContent(result);
+                                } else {
+                                    //error!!!
+                                    alert("Нет данных");
+                                }
+                            });
+                };
+                view_main.setDetailContent = function (balance_data) {
+                                                                                                                          console.log("view_main.setDetailContent balance_data=", balance_data);
+                    var view_main_list_items = registry.byId("view_main_list_items");
+                    if (view_main_list_items) view_main_list_items.destroy();
+                    view_main_list_items = new roundRectList({"id": "view_main_list_items"});
+                    view_main.addChild(view_main_list_items, 3);
+                    view_main_list_items.startup();
+                    var data = balance_data.cashbalance;
+
+                    for (var i in data) {
+                        var dataItem = data[i], listItemIdPrefix = "mainListItem_";
+                        var list_item = registry.byId(listItemIdPrefix + dataItem.id);
+                        var string_value = numeral(dataItem.value).format('0,0');
+                        list_item = new ListItem({
+                            id: listItemIdPrefix + dataItem.id,
+                            label: dataItem.label,
+                            rightText: string_value,
+                            moveTo: "view_" + dataItem.id
+                        });
+                        if (dataItem.icon) {
+                            list_item.set("icon", dataItem.icon);
+                            list_item.set("iconPos", "0,0,29,29");
+                        }
+                        if (dataItem.style) {
+                            list_item.set("style", dataItem.style);
+                        }
+                        if (!dataItem.style) {
+                            list_item.set("style", "background-color:white")
+                        }
+                        if (dataItem.url) {
+                            list_item.url = dataItem.url;
+                            list_item.onClick = function () {
+                                this.set("selected", "false");
+                              var view=  view_main.showDetailView(view_main.first_header_string + " - " + this.label, "view_" + this.id, list_item.url);
+                            }
+                        }
+                        if (!dataItem.url) {
+                            list_item.set({
+                                noArrow: true,
+                                preventTouch: true
+                            });
+                        }
+                        view_main_list_items.addChild(list_item);
+                        list_item.startup();
+                    }
+                };
+                view_main.createTopButtonsFor = function (view) {
+                    if (!view.dateBtnHeading) {
+                        var dateBtnHeading = new Heading();
+                        view.addChild(dateBtnHeading, 2);
+                        dateBtnHeading.startup();
+                        view.dateBtnHeading = dateBtnHeading;
+                    }
+                    if (!view.btnBeginDate) {
+                        view.btnBeginDate = new ToolBarButton({
+                            moveTo: "calendar_view", id: "date_first_" + view.id,
+                            transition: "fade",
+                            onClick: function () {
+                                showCalendarView(this, "Начальная дата", view)
+                            }
+                        });
+                        view.dateBtnHeading.addChild(view.btnBeginDate);
+                        view.btnBeginDate.set("label", view_main.btnBeginDate.label);
+                        view.btnBeginDate_dateValue = view_main.btnBeginDate_dateValue;
+                    } else {
+                        view.btnBeginDate.set("label", view_main.btnBeginDate.label);
+                        view.btnBeginDate_dateValue = view_main.btnBeginDate_dateValue;
+                    }
+                    if (!view.btnEndDate) {
+                        view.btnEndDate = new ToolBarButton({
+                            moveTo: "calendar_view", id: "date_last_" + view.id,
+                            transition: "fade",
+                            onClick: function () {
+                                showCalendarView(this, "Конечная дата", view)
+                            }
+                        });
+                        view.dateBtnHeading.addChild(view.btnEndDate);
+                        view.btnEndDate.set("label", view_main.btnEndDate.label);
+                        view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
+                    } else {
+                        view.btnEndDate.set("label", view_main.btnEndDate.label);
+                        view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
+                    }
+                };
+                view_main.createBottomButtonsFor = function (view) {
+
+                    if (!view.bottomHeading) {
+                        var bottomHeading = new Heading({});
+                        view.addChild(bottomHeading);
+                        view.bottomHeading = bottomHeading;
+                    }
+                    if (!view.todayBtn) {
+                        var bottom_btn1 = new ToolBarButton({
+                            label: "Сегодня",
+                            clickable: "true",
+                            style: "width:75px"
+                        });
+                        bottom_btn1.onClick = function () {
+                            var today_beginning = moment().startOf('day');
+                            var today_current_time = moment();
+                            view.btnBeginDate_dateValue = today_beginning;
+                            view.btnEndDate_dateValue = today_current_time;
+                            view.btnBeginDate.set("label", today_beginning.format("DD.MM.YYYY"));
+                            view.btnEndDate.set("label", today_current_time.format("DD.MM.YYYY"));
+                            view.loadDetailContent();
+                        };
+                        view.todayBtn = bottom_btn1;
+                        view.bottomHeading.addChild(view.todayBtn);
+                    }
+                    if (!view.yesterdayBtn) {
+                        var bottom_btn2 = new ToolBarButton({
+                            label: "Вчера",
+                            clickable: "true",
+                            style: "width:75px"
+                        });
+                        bottom_btn2.onClick = function () {
+                            var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
+                            var yesterday_end = moment().endOf('day').subtract(1, 'days');
+                            view.btnBeginDate_dateValue = yesterday_beginning;
+                            view.btnEndDate_dateValue = yesterday_end;
+                            view.btnBeginDate.set("label", yesterday_beginning.format("DD.MM.YYYY"));
+                            view.btnEndDate.set("label", yesterday_end.format("DD.MM.YYYY"));
+                            view.loadDetailContent();
+                        };
+                        view.yesterdayBtn = bottom_btn2;
+                        view.bottomHeading.addChild(view.yesterdayBtn);
+                    }
+                    if (!view.weekBtn) {
+                        var bottom_btn3 = new ToolBarButton({
+                            label: "Неделя", clickable: "true", style: "width:75px"
+                        });
+                        bottom_btn3.onClick = function () {
+                            var week_beginning = moment().startOf('week');
+                            var today_current_time = moment();
+                            view.btnBeginDate_dateValue = week_beginning;
+                            view.btnEndDate_dateValue = today_current_time;
+                            view.btnBeginDate.set("label", week_beginning.format("DD.MM.YYYY"));
+                            view.btnEndDate.set("label", today_current_time.format("DD.MM.YYYY"));
+                            view.loadDetailContent();
+                        };
+                        view.weekBtn = bottom_btn3;
+                        view.bottomHeading.addChild(view.weekBtn);
+                    }
+                    if (!view.monthBtn) {
+                        var bottom_btn4 = new ToolBarButton({
+                            label: "Месяц",
+                            clickable: "true",
+                            style: "width:75px"
+                        });
+                        bottom_btn4.onClick = function () {
+                            var month_beginning = moment().startOf('month');
+                            var today_current_time = moment();
+                            view.btnBeginDate_dateValue = month_beginning;
+                            view.btnEndDate_dateValue = today_current_time;
+                            view.btnBeginDate.set("label", month_beginning.format("DD.MM.YYYY"));
+                            view.btnEndDate.set("label", today_current_time.format("DD.MM.YYYY"));
+                            view.loadDetailContent();
+                        };
+                        view.monthBtn = bottom_btn4;
+                        view.bottomHeading.addChild(view.monthBtn);
+                    } else {
+                        view.btnBeginDate.set("label", view_main.btnBeginDate.label);
+                        view.btnEndDate.set("label", view_main.btnEndDate.label);
+                    }
+                };
+                view_main.showDetailView = function (heading_label, id, url) {
+                    var view = registry.byId(id);
+                    if (!view) {
+                        var view_div = document.createElement("div");
+                        view_div.setAttribute("id", id);
+                        document.getElementById("body").appendChild(view_div);
+                        view = new View({id: id}, id);
+                        var top_heading = new Heading({
+                            label: heading_label,
+                            back: "Назад",
+                            moveTo: "view_main",
+                            onClick: function () {
+                                view_main.loadDetailContent()
+                            }
+                        });
+                        view.url = url;
+                        view.addChild(top_heading, 0);
+                        view.startup();
+                        createPickBtnFor(view);
+                        view_main.createTopButtonsFor(view);
+                        view_main.createBottomButtonsFor(view);
+
+                        view.loadDetailContent = function () {
+                            var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
+                            var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
+                            var unit_params = null;
+                            var units_list = view_main.pickUnitBtn.selected_units;
+                            for (var i in units_list) {
+                                unit_params = "unit" + i + "=id:" + units_list[i].id;
+                                unit_params = (unit_params === null) ? "" : "&" + unit_params;
+                            }
+                                                                                                console.log("view.url=",view.url);
+                            getJSONData({
+                                        //  url: "mobile/cashin_sum.json"
+                                        url:view.url,
+                                        condition: "action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                        consoleLog: true
+                                    }
+                                    , function (success, result) {
+                                        if (success) {
+                                            view.setDetailContent(result);
+                                        } else {
+                                            alert("Нет данных");
+
+                                        }
+                                    }
+                            );
+                        };
+
+                    }
+                    view.setDetailContent = function (data) {
+                        // var data;
+                        var list_items = registry.byId("list" + this.id);
+                        if (list_items) {
+                            list_items.destroy();
+                        }
+                        list_items = new roundRectList({"id": "list" + this.id});
+                        this.addChild(list_items, 3);
+                        list_items.startup();
+
+                        /*
+                         [
+                         {"date":"21.11.2016 12:25","sum":"125"},
+                         {"date":"21.11.2016 12:30","sum":"340"},
+                         {"date":"21.11.2016 12:38","sum":"600"},
+                         {"date":"21.11.2016 12:42","sum":"-340"},
+                         {"date":"21.11.2016 12:50","sum":"1500"}
+                         ]
+                         */
+                        for (var i in data) {
+                            var dataItem = data[i];
+                            var string_sum = numeral(dataItem.sum).format('0,0');
+                            var item = new ListItem({
+                                style: "background-color:white",
+                                label: dataItem.date,
+                                rightText: string_sum
+                            });
+                            list_items.addChild(item);
+                        }
+                        list_items.startup();
+                    };
+                    view.loadDetailContent();
+                     return view;
+                };
+                var showCalendarView = function (btn, heading, view) {
+                    var date_picker = registry.byId("date_picker");
+                    var accept_btn = registry.byId("accept_btn");
+                    var calendar_heading = registry.byId("calendar_heading");
+                    var calendar_view = registry.byId("calendar_view");
+                    if (!calendar_view) {
+                        var view_div = document.createElement("div");
+                        view_div.setAttribute("id", "calendar_view");
+                        document.getElementById("body").appendChild(view_div);
+                        calendar_view = new View({id: "calendar_view"}, "calendar_view");
+                        calendar_heading = new Heading({
+                            transition: "fade",
+                            id: "calendar_heading",
+                            back: "Назад",
+                            moveTo: view.id
+                        });
+                        calendar_view.addChild(calendar_heading);
+                        date_picker = new CalendarLite({
+                            lang: 'ru',
+                            id: "date_picker"
+                        }, "date_picker");
+                        date_picker.startup();
+                        calendar_view.addChild(date_picker);
+                        var accept_heading = new Heading(
+                                //  { style:"align: center"}
+                        );
+                        accept_btn = new ToolBarButton({
+                            style: "width:75px;align",
+                            id: "accept_btn", label: "Выбрать",
+                            transition: "fade"
+                        });
+                        accept_heading.addChild(accept_btn);
+                        calendar_view.addChild(accept_heading);
+                        accept_heading.startup();
+                        calendar_view.startup();
+                    }
+                    var string_date = "" + btn.get("label").substring(6, 10) + "-" + btn.get("label").substring(3, 5) + "-" + btn.get("label").substring(0, 2);
+                    date_picker.set("value", string_date);
+                    calendar_heading.set("label", heading);
+                    calendar_heading.set("moveTo", view.id);
+                    accept_btn.set("moveTo", view.id);
+                    accept_btn.onClick = function () {
+                        var selected_date = moment(date_picker.get("value"));
+                        btn.set("label", selected_date.format("DD.MM.YYYY"));
+                        if (btn.id == "date_first_" + view.id) {
+                            view.btnBeginDate_dateValue = selected_date;
+                                                                                                                        console.log("view.btnBeginDate_dateValue=", (new Date(view.btnBeginDate_dateValue)).getTime());
+                        }
+                        if (btn.id == "date_last_" + view.id) {
+                            view.btnEndDate_dateValue = selected_date;
+                        }
+                        var date1_milsec = new Date(view.btnBeginDate_dateValue).getTime();
+                        var date2_milsec = new Date(view.btnEndDate_dateValue).getTime();
+//                        if ((date2_milsec - date1_milsec) < 0) {
+//                          var temp=view.btnBeginDate_dateValue;
+//                            view.btnBeginDate_dateValue=view.btnEndDate_dateValue;
+//                            view.btnEndDate_dateValue=temp;
+//                        }
+                        // view.setDetailContent();
+                        view.loadDetailContent();
+                    }
+                };
+                var showPickUnitView = function (btn, view) {
+                    var pick_view = registry.byId(view.id + "_pick_unit");
+                    if (!pick_view) {
+                        var view_div = document.createElement("div");
+                        view_div.setAttribute("id", view.id + "_pick_unit");
+                        document.getElementById("body").appendChild(view_div);
+                        pick_view = new View({id: view.id + "_pick_unit"}, view.id + "_pick_unit");
+
+                        var top_heading = new Heading({
+                            transition: "fade",
+                            label: "Выберите филиал",
+                            back: "Назад",
+                            moveTo: view.id
+                        });
+                        top_heading.startup();
+                        pick_view.addChild(top_heading, 0);
+                    }
+                    pick_view.listUnitButtons = [];
+                    var data;
+                    var list_of_units = registry.byId(view.id + "list_of_units");
+                    if (list_of_units) list_of_units.destroy();
+                    list_of_units = new roundRectList({
+                        style: "background-color:white",
+                        "id": view.id + "list_of_units"
+                    });
+                    pick_view.addChild(list_of_units);
+                    list_of_units.startup();
+
+                    data = btn.units_data;
+                    for (var i in data) {
+                        var dataItem = data[i];
+                        var tooggleBtn = new ToggleButton({
+                            label: dataItem.short_name,
+                            style: "font-size: 1em; width:100px; text-align:left"
+                        });
+                        tooggleBtn.unit_id = dataItem.id;
+                        var item = new ListItem({
+                            preventTouch: true,
+                            innerHTML: " " + dataItem.name,
+                            style: "background-color:white"
+                        });
+                        for (var s in btn.selected_units) {
+                            if (tooggleBtn.unit_id == btn.selected_units[s].id) {
+                                tooggleBtn.set("checked", true);
+                            }
+                            list_of_units.addChild(item);
+                            pick_view.listUnitButtons[i] = tooggleBtn;
+                            item.addChild(tooggleBtn, 0);
+                        }
+                        list_of_units.startup();
+
+                        view.confirmBtn = registry.byId(view.id + "confirmBtn");
+                        if (!view.confirmBtn) {
+                            view.accept_heading = new Heading();
+                            view.confirmBtn = new ToolBarButton({
+                                transition: "fade",
+                                id: view.id + "confirmBtn",
+                                label: "Выбрать",
+                                onClick: function () {
+                                    btn.selected_units = [];
+                                    view.string_units = "";
+                                    var d = 0;
+                                    for (var j = 0; j < pick_view.listUnitButtons.length; j++) {
+                                        var dataItem = data[j];
+                                        if (pick_view.listUnitButtons[j].get("checked") == true) {
+                                            view.string_units += "" + dataItem.short_name + " | ";
+                                            btn.selected_units[d] = dataItem;
+                                            d++;
+                                        }
+                                    }
+                                    if (btn.selected_units.length < 1) {
+                                    } else {
+                                        view.confirmBtn.set("moveTo", view.id);
+                                        view.string_units = view.string_units.slice(0, view.string_units.length - 3);
+                                        btn.set("label", view.string_units)
+                                    }
+                                }
+                            });
+                        }
+                        view.accept_heading.addChild(view.confirmBtn);
+                        pick_view.addChild(view.accept_heading);
+                        view.accept_heading.startup();
+                        view.startup();
+                    }
+                };
+                var createPickBtnFor = function (view) {
+                    if (!view.pickUnitBtnHeading) {
+                        view.pickUnitBtnHeading = new Heading();
+                        view.addChild(view.pickUnitBtnHeading);
+                        view.pickUnitBtnHeading.startup();
+                    }
+                    if (view.pickUnitBtn) view.pickUnitBtn.destroy();
+                    view.pickUnitBtn = new ToolBarButton({
+                        style: "width:" + v + "px; font-size:14px; align: center",
+                        transition: "fade",
+                        moveTo: view.id + "_pick_unit",
+                        onClick: function () {
+                            showPickUnitView(this, view);
+                        }
+                    });
+                    view.pickUnitBtn.units_data = view_main.pickUnitBtn.units_data;
+                    view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
+                    view.pickUnitBtn.set("label", view_main.string_units);
+                    view.pickUnitBtnHeading.addChild(view.pickUnitBtn);
+                };
+                view_main.loadMainContent();
+            });
+</script>
+</html>

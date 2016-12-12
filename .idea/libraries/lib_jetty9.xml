@@ -1,0 +1,34 @@
+<component name="libraryTable">
+  <library name="lib_jetty9">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-alpn-client-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-alpn-server-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-annotations-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-cdi-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-client-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-continuation-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-deploy-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-http-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-io-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-jaas-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-jaspi-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-jmx-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-jndi-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-plus-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-proxy-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-quickstart-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-rewrite-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-security-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-server-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-servlet-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-servlets-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-util-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-webapp-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-xml-9.2.11.v20150529.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/servlet-api-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib_jetty9/jetty-schemas-3.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

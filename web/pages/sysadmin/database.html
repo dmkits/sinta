@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="sa_database_PageContainer" style="width:100%;height:100%;">
+    <div id="sa_database_PageCenterContainer" style="width:100%;height:100%;; margin:0;padding:0;">
+        <div id="sa_database_PageCenterTopContent" style="width:100%;height:auto; margin:0;padding:0;">
+            <table width="100%">
+                <tr><td height="20px">
+                    <table width="100%">
+                        <tr><th height="30px" width="100px"><b>Database:</b></th><th><div id="sa_database_CurrDBConn"></div></th></tr>
+                    </table>
+                </td></tr>
+                <tr><td height="1px">
+                    <table width="100%">
+                        <tr><td width="90px">Validate state: <td><div id="sa_database_DBValidateState"></div></td></tr>
+                    </table>
+                </td></tr>
+                <tr><td height="30px">
+                    <button id="SA_database_BtnReconnentToDB">ReConnect to DB</button>
+                    <button id="SA_database_BtnCleanDB">Clear DB</button>
+                    <button id="SA_database_BtnGetChangeLog">Get changelog</button>
+                    <button id="SA_database_BtnGetCurrUpdChanges">Get current update changes</button>
+                    <button id="SA_database_BtnUpdateDB">Update database</button>
+                </td></tr>
+                <tr><td height="20px"><div id="sa_database_DBActionResult"></div></td></tr>
+                <!--<tr><td height="100%"></td></tr>-->
+                <!--<tr><td></td></tr>-->
+            </table>
+        </div>
+        <div id="SA_database_htActionLog" style="width:100%;height:100%;margin:0;padding:0;"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dojo/data/ItemFileReadStore",
+                "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button", "htable"],
+            function (registry, BorderContainer, LayoutContainer, ContentPane, ItemFileReadStore, TextBox,DateTextBox, Button, htable) {
+                var sa_database_PageContainer = initElem(registry, "sa_database_PageContainer", "sa_database_PageContainer", BorderContainer, {});
+                var sa_database_PageCenterContainer=initElem(registry, "sa_database_PageCenterContainer", "sa_database_PageCenterContainer", LayoutContainer, {region:'center'});
+                initElem(registry, "sa_database_PageCenterTopContent", "sa_database_PageCenterTopContent", ContentPane, {region:'top'});
+                var SA_database_BtnReconnentToDB=initElem(registry, "SA_database_BtnReconnentToDB", "SA_database_BtnReconnentToDB", Button, {style:"width:110px"});
+                var SA_database_BtnCleanDB=initElem(registry, "SA_database_BtnCleanDB", "SA_database_BtnCleanDB", Button, {style:"width:100px"});
+                var SA_database_BtnGetChangeLog=initElem(registry, "SA_database_BtnGetChangeLog", "SA_database_BtnGetChangeLog", Button, {style:"width:100px"});
+                var SA_database_BtnGetCurrUpdChanges=initElem(registry, "SA_database_BtnGetCurrUpdChanges", "SA_database_BtnGetCurrUpdChanges", Button, {style:"width:160px"});
+                var SA_database_BtnUpdateDB=initElem(registry, "SA_database_BtnUpdateDB", "SA_database_BtnUpdateDB", Button, {style:"width:120px"});
+                var SA_database_htActionLog= initElem(registry, "SA_database_htActionLog", "SA_database_htActionLog",
+                        htable, {region:'center', getURL:"/sysadmin/database", useFilters:true, readOnly:true,htaddRows:0,wordWrap:true});
+                /*---actions---*/
+                sa_database_PageContainer.getDatabaseStateInfo = function() {
+                    getJSONData({url: "/sysadmin/database", condition: "action=get_connect_to_db_state", consoleLog: true},
+                            function (success, result) {
+                                var sa_database_CurrDBConn = document.getElementById("sa_database_CurrDBConn");
+                                var sa_database_DBValidateState =document.getElementById("sa_database_DBValidateState");
+                                if (success) {
+                                    if (result["error"]) {
+                                        sa_database_CurrDBConn.innerHTML="<b style='color:red;'>"+result["error"]+"</b>";
+                                        sa_database_DBValidateState.innerHTML="<b style='color:red;'>Unknown, because cannot connect to database!</b>";
+                                        SA_database_BtnGetChangeLog.set("disabled",true);
+                                        SA_database_BtnGetCurrUpdChanges.set("disabled",true);
+                                        SA_database_BtnUpdateDB.set("disabled",true);
+                                    } else {
+                                        sa_database_CurrDBConn.innerHTML="<b>Connected to: <span style='text-decoration:underline'>"+result["result"]+"</span></b>";
+                                        SA_database_BtnGetChangeLog.set("disabled",false);
+                                        SA_database_BtnGetCurrUpdChanges.set("disabled",false);
+                                        SA_database_BtnUpdateDB.set("disabled",false);
+                                        if (result["validate_error"]) {
+                                            sa_database_DBValidateState.innerHTML="<b style='color:red;'>"+result["validate_error"]+"</b>";
+                                        } else {
+                                            sa_database_DBValidateState.innerHTML="<b>Database validate success.</b>";
+                                        }
+                                    }
+                                } else {
+                                    sa_database_CurrDBConn.innerHTML="<b style='color:red;'>No connection info! Reason: no connection to the server!</b>";
+                                    sa_database_DBValidateState.innerHTML="<b style='color:red;'>No database validate info! Reason: no connection to the server!</b>";
+                                }
+                            });
+                };
+                SA_database_BtnReconnentToDB.onClick = function(){
+                    var sa_database_CurrDBConn= document.getElementById("sa_database_CurrDBConn");
+                    sa_database_CurrDBConn.innerHTML="<b>Reconnecting to database...</b>";
+                    postJSONData({url: "/sysadmin/database", condition: "action=reconnect_to_db", consoleLog: true},
+                            function (success, result) {
+                                var sa_database_CurrDBConn= document.getElementById("sa_database_CurrDBConn");
+                                var sa_database_DBValidateState=document.getElementById("sa_database_DBValidateState");
+                                if(success){
+                                    if (result["error"]) {
+                                        sa_database_CurrDBConn.innerHTML="<b style='color:red;'>"+result["error"]+"</b>";
+                                    } else {
+                                        sa_database_CurrDBConn.innerHTML="<b>Reconnected to: <span style='text-decoration:underline'>"+result["result"]+"</span></b>";
+                                    }
+                                    if (result["validate_error"]) {
+                                        sa_database_DBValidateState.innerHTML="<b style='color:red;'>"+result["validate_error"]+"</b>";
+                                    } else {
+                                        sa_database_DBValidateState.innerHTML="<b>Database validate success.</b>";
+                                    }
+                                } else {
+                                    sa_database_CurrDBConn.innerHTML="<b style='color:red;'>No connection info! Reason: no connection to the server!</b>";
+                                    sa_database_DBValidateState.innerHTML="<b style='color:red;'>No database validate info! Reason: no connection to the server!</b>";
+                                }
+                                if(sa_database_PageContainer.getParent().updateStateInfo) sa_database_PageContainer.getParent().updateStateInfo();
+                            });
+                };
+                SA_database_BtnCleanDB.onClick = function(){
+                    var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                    sa_database_DBActionResult.innerHTML="<b>Ceaning database...</b>";
+                    postJSONData({url: "/sysadmin/database", condition: "action=clean_db", consoleLog: true},
+                            function (success, result) {
+                                var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                                if(success){
+                                    if (result["error"]) {
+                                        sa_database_DBActionResult.innerHTML="<b style='color:red;'>"+result["error"]+"</b>";
+                                    } else {
+                                        sa_database_DBActionResult.innerHTML="<b>"+result["result"]+"</b>";
+                                    }
+                                } else {
+                                    sa_database_DBActionResult.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                            });
+                };
+                SA_database_BtnGetChangeLog.onClick = function(){
+                    SA_database_htActionLog.loadContentFromUrl("action=get_changelog",
+                            /*posaction*/function(success,result){
+                                var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                                if(success==true){
+                                    var actionText= "";
+                                    var changeCount=result["items"].length;                                             console.log(result);
+                                    if(changeCount&&changeCount>0) actionText="<b>Founded "+changeCount+" change log items.</b>";
+                                    else actionText="<b>No change log items.</b>";
+                                    if(result.error){
+                                        actionText = actionText+"<br><b style='color:red'>WARNING: "+result.error+"</b>";
+                                    }
+                                    sa_database_DBActionResult.innerHTML = actionText;
+                                } else {
+                                    sa_database_DBActionResult.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                                sa_database_PageCenterContainer.layout();
+                            });
+                };
+                SA_database_BtnGetCurrUpdChanges.onClick = function(){
+                    SA_database_htActionLog.loadContentFromUrl("action=get_changes",
+                            /*posaction*/function(success,result){
+                                var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                                if(success==true){
+                                    var actionText= "";
+                                    var changeCount=result["items"].length;
+                                    if(changeCount&&changeCount>0) actionText="<b>Founded "+changeCount+" update items.</b>";
+                                    else actionText="<b>No updates.</b>";
+                                    if(result.error){
+                                        actionText = actionText+"<br><b style='color:red'>WARNING: "+result.error+"</b>";
+                                    }
+                                    sa_database_DBActionResult.innerHTML = actionText;
+                                } else {
+                                    sa_database_DBActionResult.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                }
+                                sa_database_PageCenterContainer.layout();
+                            });
+                };
+                SA_database_BtnUpdateDB.onClick = function(){
+                    var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                    sa_database_DBActionResult.innerHTML="<b>Start database updating...</b>";
+                    SA_database_htActionLog.loadContentFromUrlByAction("action=update_database",[],
+                            /*posaction*/function(success,result){
+                                var sa_database_DBActionResult= document.getElementById("sa_database_DBActionResult");
+                                var sa_database_DBValidateState=document.getElementById("sa_database_DBValidateState");
+                                if(success==true){
+                                    var actionText= "";
+                                    var changeCount=result["changeCount"];
+                                    if(changeCount&&changeCount>0) actionText="<b>Has been applied "+changeCount+" updates.</b>";
+                                    else if(changeCount&&changeCount==0) actionText="<b>No updates.</b>";
+                                    else actionText = "<b style='color:red'>Cannot do update!</b>";
+                                    if(result.error){
+                                        actionText = actionText+"<br><b style='color:red'>WARNING: "+result.error+"</b>";
+                                    }
+                                    sa_database_DBActionResult.innerHTML = actionText;
+                                    if (result["validate_error"]) {
+                                        sa_database_DBValidateState.innerHTML="<b style='color:red;'>"+result["validate_error"]+"</b>";
+                                    } else {
+                                        sa_database_DBValidateState.innerHTML="<b>Database validate success.</b>";
+                                    }
+                                } else {
+                                    sa_database_DBActionResult.innerHTML="<b style='color:red;'>No connection to the server!</b>";
+                                    sa_database_DBValidateState.innerHTML="<b style='color:red;'>Unknown, because no connection to the server!</b>";
+                                }
+                                sa_database_PageCenterContainer.layout();
+                                if(sa_database_PageContainer.getParent().updateStateInfo) sa_database_PageContainer.getParent().updateStateInfo();
+                            });
+                };
+                /*---initing on load---*/
+                sa_database_PageContainer.getDatabaseStateInfo();
+            });
+</script>
+</html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="4174768177">
+    <data-source source="LOCAL" name="Derby - BATA1" uuid="4d2ed19c-a6b1-479e-b5c9-a7d5d2a62fdf">
+      <driver-ref>derby.embedded</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby:$PROJECT_DIR$/db/bata1;</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Derby -obpos" uuid="31775a91-87b3-4892-b44b-a681d9bbe2af">
+      <driver-ref>derby.embedded</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby:$USER_HOME$/obpos/openbravopos-bistro</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Derby bata1-pos1-test_sync" uuid="91e1c8bd-895a-4684-a4f5-db9dfd343a67">
+      <driver-ref>derby.embedded</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby:$USER_HOME$/bata_obpos.prj/BataPOSDerbySyncClient/db/bata1_pos1;</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Derby -bata1_work_copy" uuid="7fadbd52-dcf2-406a-a57b-89c2f0b1df80">
+      <driver-ref>derby.embedded</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby:$PROJECT_DIR$/db/bata1_work_copy;</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Derby - bata1@localhost" uuid="5e59ad2e-930b-4fb9-bb00-c98366a9699e">
+      <driver-ref>derby.remote</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.ClientDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby://localhost:1527/bata1</jdbc-url>
+      <libraries />
+    </data-source>
+  </component>
+</project>

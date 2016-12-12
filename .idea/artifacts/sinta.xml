@@ -1,0 +1,30 @@
+<component name="ArtifactManager">
+  <artifact name="sinta">
+    <output-path>$PROJECT_DIR$/out/artifacts/sinta</output-path>
+    <root id="root">
+      <element id="directory" name="lib">
+        <element id="dir-copy" path="$PROJECT_DIR$/lib" />
+      </element>
+      <element id="directory" name="lib_jetty9">
+        <element id="dir-copy" path="$PROJECT_DIR$/lib_jetty9" />
+      </element>
+      <element id="directory" name="web">
+        <element id="dir-copy" path="$PROJECT_DIR$/web" />
+      </element>
+      <element id="archive" name="sinta.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="sinta" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/sintastart" />
+      <element id="file-copy" path="$PROJECT_DIR$/sintastart.cmd" />
+      <element id="file-copy" path="$PROJECT_DIR$/sintastart.sh" />
+      <element id="file-copy" path="$PROJECT_DIR$/sintastartdaemon.sh" />
+      <element id="file-copy" path="$PROJECT_DIR$/sintastartXTerm.sh" />
+      <element id="file-copy" path="$PROJECT_DIR$/production.properties" />
+      <element id="file-copy" path="$PROJECT_DIR$/test.properties" />
+      <element id="file-copy" path="$PROJECT_DIR$/sintastart_test.cmd" />
+    </root>
+  </artifact>
+</component>
