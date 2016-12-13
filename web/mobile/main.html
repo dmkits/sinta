@@ -183,7 +183,7 @@
                             list_item.url = dataItem.url;
                             list_item.actionValue = dataItem.action;
                             list_item.onClick = function () {
-                                this.set("selected", "false");
+                               // this.set("selected", "false");
                               var view=  view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url,this.actionValue);
                             }
                         }
@@ -246,7 +246,7 @@
                         var bottom_btn1 = new ToolBarButton({
                             label: "Сегодня",
                             clickable: "true",
-                            style: "width:75px"
+                           // style: "width:75px"
                         });
                         bottom_btn1.onClick = function () {
                             var today_beginning = moment().startOf('day');
@@ -264,7 +264,7 @@
                         var bottom_btn2 = new ToolBarButton({
                             label: "Вчера",
                             clickable: "true",
-                            style: "width:75px"
+                           // style: "width:75px"
                         });
                         bottom_btn2.onClick = function () {
                             var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
@@ -280,7 +280,8 @@
                     }
                     if (!view.weekBtn) {
                         var bottom_btn3 = new ToolBarButton({
-                            label: "Неделя", clickable: "true", style: "width:75px"
+                            label: "Неделя", clickable: "true",
+                            //style: "width:75px"
                         });
                         bottom_btn3.onClick = function () {
                             var week_beginning = moment().startOf('week');
@@ -298,7 +299,7 @@
                         var bottom_btn4 = new ToolBarButton({
                             label: "Месяц",
                             clickable: "true",
-                            style: "width:75px"
+                          //  style: "width:75px"
                         });
                         bottom_btn4.onClick = function () {
                             var month_beginning = moment().startOf('month');
@@ -318,7 +319,10 @@
                 };
                 view_main.showDetailView = function (heading_label, id, url, actionValue) {
                     var view = registry.byId(id);
-                    if (!view) {
+                    if(view){
+                        view.destroy();
+                    }
+                  // if (!view) {
                         var view_div = document.createElement("div");
                         view_div.setAttribute("id", id);
                         document.getElementById("body").appendChild(view_div);
@@ -362,13 +366,12 @@
                                             view.setDetailContent(result.items);
                                         } else {
                                             alert("Нет данных");
-
                                         }
                                     }
                             );
                         };
 
-                    }
+                 //   }
                     view.setDetailContent = function (data) {                                               console.log("view.setDetailContent view.id="+this.id+" data=",data);
                         // var data;
                         var list_items = registry.byId("list" + this.id);
@@ -390,11 +393,11 @@
                          */
                         for (var i in data) {
                             var dataItem = data[i];
-                            var string_sum = numeral(dataItem.sum).format('0,0');
+                           // var string_sum = numeral(dataItem.sum).format('0,0');
                             var item = new ListItem({
                                 style: "background-color:white",
                                 label: dataItem.label,
-                                rightText: dataItem.value
+                                rightText: numeral(dataItem.value).format('0,0')
                             });
                             list_items.addChild(item);
                         }
@@ -454,8 +457,8 @@
                         if (btn.id == "date_last_" + view.id) {
                             view.btnEndDate_dateValue = selected_date;
                         }
-                        var date1_milsec = new Date(view.btnBeginDate_dateValue).getTime();
-                        var date2_milsec = new Date(view.btnEndDate_dateValue).getTime();
+//                        var date1_milsec = new Date(view.btnBeginDate_dateValue).getTime();
+//                        var date2_milsec = new Date(view.btnEndDate_dateValue).getTime();
 //                        if ((date2_milsec - date1_milsec) < 0) {
 //                          var temp=view.btnBeginDate_dateValue;
 //                            view.btnBeginDate_dateValue=view.btnEndDate_dateValue;
