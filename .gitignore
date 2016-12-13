@@ -1,5 +1,5 @@
 .git/
-model/tables/
 /out/production/
 /.idea/
 /.gitignore
+!/.gitignore
