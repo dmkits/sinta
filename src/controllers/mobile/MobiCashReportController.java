@@ -63,17 +63,30 @@ public class MobiCashReportController extends PageController {
                                 .putToSelectResultItemValue("url", "/mobile")
                                 .putToSelectResultItemValue("action", "get_sales")
                                 .getSelectResultItemValues());
+
+                res.add(1,
+                        DMMetadata.newMetadata("t_CRRet", "ChID", ftype_INTEGER)
+                                .cloneWithoutFields()
+                                .addFieldFunction("value", FUNC_SUMNOTNULL, null, "TSumCC_wt")
+                                .addWhereCondition("DocDate", ">=", sBDate)
+                                .addWhereCondition("DocDate", "<=", sEDate)
+                                .selectList(getSessionDBUS(session))
+                                .putToSelectResultItemValue("id", 1)
+                                .putToSelectResultItemValue("label", "Возвраты")
+                                .putToSelectResultItemValue("url", "/mobile")
+                                .putToSelectResultItemValue("action", "get_returns")
+                                .getSelectResultItemValues());
                 outData.put("cashbalance",res);
             } catch (Exception e){
                 outData.put("error",e.getLocalizedMessage());
             }
-        } else if(sAction.equals("get_sales")){
+        } else if(sAction.equals("get_returns")){
             HashMap<String,String> params = getReqParams(req);
             String sBDate = params.get("bdate");
             String sEDate = params.get("edate");
-            DMMetadata.newMetadata("t_Sale", "ChID", ftype_INTEGER)
+            DMMetadata.newMetadata("t_CRRet", "ChID", ftype_INTEGER)
                     .cloneWithFields()
-                    .joinSource("t_SaleD", "ChID", "t_Sale", "ChID")
+                    .joinSource("t_SaleD", "ChID", "t_CRRet", "ChID")
                     .joinSource("r_Prods","ProdID","t_SaleD", "ProdID")
                     .joinSource("r_ProdG3", "PGrID3", "r_Prods", "PGrID3")
                     .addGroupedField("label", "r_ProdG3", "PGrName3")

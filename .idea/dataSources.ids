@@ -1394,4 +1394,7 @@
       <foreign-key name="WRH_RETAIL_TICKET_PRODUCTS_RETAIL_TICKET_ID_FK" columns="RETAIL_TICKET_ID" ref-table="WRH_RETAIL_TICKETS" ref-schema="APP" ref-catalog="" ref-columns="ID" update-rule="3" delete-rule="3" deferrability="2"/>
     </table>
   </data-source>
+  <data-source name="SQL Server - GMSData38_20161212@localhost\SQLEXPRESS" uuid="9e58c4ab-db59-4056-b47a-afc872413b42">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
 </component>
