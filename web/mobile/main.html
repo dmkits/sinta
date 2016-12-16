@@ -122,7 +122,7 @@
                                 showCalendarView(this, "Начальная дата", view)
                             }
                         });
-                        dateBtnHeading.addChild(view.btnBeginDate);
+                        view.dateBtnHeading.addChild(view.btnBeginDate);
                         view.btnBeginDate.set("label", view_main.btnBeginDate.label);
                         view.btnBeginDate_dateValue = view_main.btnBeginDate_dateValue;
                     } else {
@@ -137,32 +137,24 @@
                                 showCalendarView(this, "Конечная дата", view)
                             }
                         });
-                        dateBtnHeading.addChild(view.btnEndDate);
+                        view.dateBtnHeading.addChild(view.btnEndDate);
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
                         view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
                     } else {
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
                         view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
                     }
-
                 };
-                view_main.createTopButtonsFor(view_main);
-
                 view_main.createBottomButtonsFor = function (view) {
                     var bottomHeading = registry.byId(view.id + "bottom_h");
                     if (!bottomHeading) {
-                        bottomHeading = new Heading({fixed: "bottom"}, view.id + "bottom_h");
-                        console.log("bottomHeading.id=", view.id + "bottom_h");
-                        //  view.div_bottom_heading.appendChild(bottomHeading);
-                        // view.addChild(bottomHeading);
-                        // view.bottomHeading = bottomHeading;
+                        bottomHeading = new Heading({fixed: "bottom"}, view.id + "bottom_h");                           console.log("bottomHeading.id=", view.id + "bottom_h");
                         bottomHeading.startup();
                     }
                     if (!view.todayBtn) {
                         var bottom_btn1 = new ToolBarButton({
                             label: "Сегодня",
                             clickable: "true"
-                            // style: "width:75px"
                         });
                         bottom_btn1.onClick = function () {
                             var today_beginning = moment().startOf('day');
@@ -180,7 +172,6 @@
                         var bottom_btn2 = new ToolBarButton({
                             label: "Вчера",
                             clickable: "true"
-                            // style: "width:75px"
                         });
                         bottom_btn2.onClick = function () {
                             var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
@@ -197,7 +188,6 @@
                     if (!view.weekBtn) {
                         var bottom_btn3 = new ToolBarButton({
                             label: "Неделя", clickable: "true"
-                            //style: "width:75px"
                         });
                         bottom_btn3.onClick = function () {
                             var week_beginning = moment().startOf('week');
@@ -215,7 +205,6 @@
                         var bottom_btn4 = new ToolBarButton({
                             label: "Месяц",
                             clickable: "true"
-                            //  style: "width:75px"
                         });
                         bottom_btn4.onClick = function () {
                             var month_beginning = moment().startOf('month');
@@ -233,13 +222,6 @@
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
                     }
                 };
-
-                console.log("before createBottomButtonsFor");
-
-                view_main.createBottomButtonsFor(view_main);
-                view_main.inner_scroll.startup();
-                view_main.startup();
-
                 /*{
                  "head": "Магазины",
                  "units":[
@@ -248,8 +230,7 @@
                  }*/
                 view_main.loadMainContent = function () {
                     getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true}
-                            , function (success, result) {
-                                console.log("view_main.loadMainContent getJSONData ", result);
+                            , function (success, result) {                                            console.log("view_main.loadMainContent getJSONData ", result);
                                 if (success) {
                                     view_main.setMainContent(result);
                                 } else {//error!!!
@@ -261,22 +242,21 @@
                 view_main.setMainContent = function (maindata) {
                     view_main.first_header_string = maindata.head;
                     view_main.top_heading_main.set("label", view_main.first_header_string);
-
                     view_main.pickUnitBtn.units_data = maindata.units;
                     view_main.pickUnitBtn.selected_units = [];
                     view_main.pickUnitBtn.selected_units[0] = view_main.pickUnitBtn.units_data[0];
                     view_main.string_units = view_main.pickUnitBtn.selected_units[0].short_name;
                     view_main.pickUnitBtn.set("label", view_main.string_units);
-
+                    view_main.createTopButtonsFor(view_main);
+                    view_main.createBottomButtonsFor(view_main);
+                    view_main.inner_scroll.startup();
+                    view_main.startup();
                     if (!view_main.btnBeginDate.label) view_main.todayBtn.onClick();
                     //   view_main.btnBeginDate_dateValue, view_main.btnEndDate_dateValue
                     //          20161001    201610131
                     //  var cashbalance = loadMobileDataFromServer("/mobile?action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params);
                 };
-                view_main.loadMainContent();
-
-                view_main.loadDetailContent = function () {
-                    console.log("LoadDetailContent");
+                view_main.loadDetailContent = function () {                                                  console.log("LoadDetailContent");
                     var bdate = view_main.btnBeginDate_dateValue.format("YYYYMMDD");
                     var edate = view_main.btnEndDate_dateValue.format("YYYYMMDD");
                     var unit_params = null;
@@ -292,27 +272,23 @@
                             }
                             , function (success, result) {
                                 if (success) {
-                                    if (result.error) console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                    if (result.error)                                     console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
                                     view_main.setDetailContent(result);
                                 } else {//error!!!
                                     alert("Нет данных");
                                 }
                             });
                 };
-                view_main.setDetailContent = function (balance_data) {
-                    console.log("view_main.setDetailContent balance_data=", balance_data);
+                view_main.setDetailContent = function (balance_data) {                         console.log("view_main.setDetailContent balance_data=", balance_data);
                     var view_main_list_items = registry.byId("view_main_list_items");
                     if (view_main_list_items) view_main_list_items.destroy();
                     view_main_list_items = new roundRectList({
                         style: "position:relative",
                         "id": "view_main_list_items"
                     });
-                    main_sv.addChild(view_main_list_items);
+                    view_main.inner_scroll.addChild(view_main_list_items);
                     view_main_list_items.startup();
-
-
                     var data = balance_data.cashbalance;
-
                     for (var i in data) {
                         var dataItem = data[i], listItemIdPrefix = "mainListItem_";
                         var list_item = registry.byId(listItemIdPrefix + dataItem.id);
@@ -351,27 +327,18 @@
                         list_item.startup();
                     }
                 };
-
-
                 view_main.showDetailView = function (heading_label, id, url, actionValue) {
                     var view = registry.byId(id);
                     if (view) {
                         view.destroy();
                     }
-                    // if (!view) {
                     var view_div = document.createElement("div");
                     view_div.setAttribute("id", id);
                     document.getElementById("body").appendChild(view_div);
-
                     var div_bottom_heading = document.createElement("div");
                     div_bottom_heading.setAttribute("id", "dbh_" + id);
-                    //div_bottom_heading.setAttribute("style", "position:fixed");
                     view_div.appendChild(div_bottom_heading);
-
-
-                    view = new ScrollableView({id: id}, id);
-                    //  view.div_bottom_heading=div_bottom_heading;
-
+                    view = new ScrollableView({id: id}, id);;
                     var top_heading = new Heading({
                         label: heading_label,
                         back: "Назад",
@@ -382,12 +349,10 @@
                     });
                     view.url = url;
                     view.addChild(top_heading, 0);
-                    // view.startup();
                     createPickBtnFor(view);
                     view_main.createTopButtonsFor(view);
                     view_main.createBottomButtonsFor(view);
                     view.startup();
-
                     view.loadDetailContent = function () {
                         var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
                         var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
@@ -397,7 +362,6 @@
                             unit_params = "unit" + i + "=id:" + units_list[i].id;
                             unit_params = (unit_params === null) ? "" : "&" + unit_params;
                         }
-                        console.log("view.url=", view.url);
                         getJSONData({
                                     //  url: "mobile/cashin_sum.json"
                                     url: view.url,
@@ -405,8 +369,8 @@
                                     consoleLog: true
                                 }
                                 , function (success, result) {
-                                    if (success) {                                                              //console.log("view.loadDetailContent getJSONData result.items=",result.items);
-                                        if (result.error) console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                    if (success) {
+                                        if (result.error)                                 console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
                                         view.setDetailContent(result.items);
                                     } else {
                                         alert("Нет данных");
@@ -414,10 +378,7 @@
                                 }
                         );
                     };
-
-                    //   }
-                    view.setDetailContent = function (data) {
-                        console.log("view.setDetailContent view.id=" + this.id + " data=", data);
+                    view.setDetailContent = function (data) {                                 console.log("view.setDetailContent view.id=" + this.id + " data=", data);
                         // var data;
                         var list_items = registry.byId("list" + this.id);
                         if (list_items) {
@@ -496,8 +457,7 @@
                         var selected_date = moment(date_picker.get("value"));
                         btn.set("label", selected_date.format("DD.MM.YYYY"));
                         if (btn.id == "date_first_" + view.id) {
-                            view.btnBeginDate_dateValue = selected_date;
-                            console.log("view.btnBeginDate_dateValue=", (new Date(view.btnBeginDate_dateValue)).getTime());
+                            view.btnBeginDate_dateValue = selected_date;        console.log("view.btnBeginDate_dateValue=", (new Date(view.btnBeginDate_dateValue)).getTime());
                         }
                         if (btn.id == "date_last_" + view.id) {
                             view.btnEndDate_dateValue = selected_date;
@@ -540,7 +500,6 @@
                     });
                     pick_view.addChild(list_of_units);
                     list_of_units.startup();
-
                     data = btn.units_data;
                     for (var i in data) {
                         var dataItem = data[i];
@@ -563,7 +522,6 @@
                             item.addChild(tooggleBtn, 0);
                         }
                         list_of_units.startup();
-
                         view.confirmBtn = registry.byId(view.id + "confirmBtn");
                         if (!view.confirmBtn) {
                             view.accept_heading = new Heading();
