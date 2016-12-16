@@ -71,10 +71,10 @@
                 div_main_sv.setAttribute('id', "main_sv");
                 document.getElementById('body').appendChild(div_main_sv);
                 var main_h3 = document.createElement('div');
-                main_h3.setAttribute("id", "view_maintopbtn_h");
+                main_h3.setAttribute("id", "view_mainht");
                 div_main_sv.appendChild(main_h3);
                 var main_f = document.createElement('div');
-                main_f.setAttribute("id", "view_mainbottom_h");
+                main_f.setAttribute("id", "view_mainhf");
                 div_main_sv.appendChild(main_f);
                 var view_main = new View({id: "view_main"}, "view_main");
                 var main_sv = new ScrollableView({id: "main_sv"}, "main_sv");
@@ -110,7 +110,7 @@
                         var dateBtnHeading = new Heading({
                             // id:view.id+'topbtn_h',
                             fixed: "top"
-                        }, view.id + 'topbtn_h');
+                        }, view.id + 'ht');
                         dateBtnHeading.startup();
                         view.dateBtnHeading = dateBtnHeading;
                     }
@@ -146,9 +146,9 @@
                     }
                 };
                 view_main.createBottomButtonsFor = function (view) {
-                    var bottomHeading = registry.byId(view.id + "bottom_h");
+                    var bottomHeading = registry.byId(view.id + "hf");
                     if (!bottomHeading) {
-                        bottomHeading = new Heading({fixed: "bottom"}, view.id + "bottom_h");                           console.log("bottomHeading.id=", view.id + "bottom_h");
+                        bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");                           console.log("bottomHeading.id=", view.id + "bottom_h");
                         bottomHeading.startup();
                     }
                     if (!view.todayBtn) {
@@ -335,10 +335,20 @@
                     var view_div = document.createElement("div");
                     view_div.setAttribute("id", id);
                     document.getElementById("body").appendChild(view_div);
-                    var div_bottom_heading = document.createElement("div");
-                    div_bottom_heading.setAttribute("id", "dbh_" + id);
-                    view_div.appendChild(div_bottom_heading);
-                    view = new ScrollableView({id: id}, id);;
+
+                    var div_sv=document.createElement('div');
+                    div_sv.setAttribute("id", id+"sv");
+                    document.getElementById('body').appendChild(div_sv);
+
+                    var ht=document.createElement('div');
+                    ht.setAttribute("id", id+"ht");
+                    div_sv.appendChild(ht);
+
+                    var hf=document.createElement('div');
+                    hf.setAttribute("id", id+"hf");
+                    div_sv.appendChild(hf);
+
+                    view = new View({id: id}, id);
                     var top_heading = new Heading({
                         label: heading_label,
                         back: "Назад",
@@ -347,12 +357,19 @@
                             view_main.loadDetailContent()
                         }
                     });
+                    view.inner_scroll=new ScrollableView({},view.id+"sv");
+
+
                     view.url = url;
                     view.addChild(top_heading, 0);
                     createPickBtnFor(view);
+                    view.addChild(view.inner_scroll);
                     view_main.createTopButtonsFor(view);
                     view_main.createBottomButtonsFor(view);
+
+                    view.inner_scroll.startup();
                     view.startup();
+
                     view.loadDetailContent = function () {
                         var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
                         var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
@@ -385,7 +402,7 @@
                             list_items.destroy();
                         }
                         list_items = new roundRectList({"id": "list" + this.id});
-                        this.addChild(list_items, 3);
+                        this.inner_scroll.addChild(list_items);
                         //list_items.startup();
 
                         /*
@@ -525,6 +542,7 @@
                         view.confirmBtn = registry.byId(view.id + "confirmBtn");
                         if (!view.confirmBtn) {
                             view.accept_heading = new Heading();
+                            view.accept_heading.startup();
                             view.confirmBtn = new ToolBarButton({
                                 transition: "fade",
                                 id: view.id + "confirmBtn",
@@ -552,7 +570,7 @@
                         }
                         view.accept_heading.addChild(view.confirmBtn);
                         pick_view.addChild(view.accept_heading);
-                        view.accept_heading.startup();
+                       // view.accept_heading.startup();
                         view.startup();
                     }
                 };
