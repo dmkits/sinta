@@ -25,6 +25,10 @@ public class MainController extends PageController {
         if (sMobi!=null || req.getHeader("User-Agent").indexOf("Mobi") != -1) {
             forvardTo(sMOBI_MAIN_PAGE_URI, req, resp); return;
         }
+        String sMobi_t = req.getParameter("mobiT");
+        if (sMobi_t!=null || req.getHeader("User-Agent").indexOf("Mobi") != -1) {
+            forvardTo("/mobile/main_test.html", req, resp); return;
+        }
         super.doGet(req, resp);
     }
 

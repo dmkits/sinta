@@ -40,6 +40,35 @@
             font-size: 1.5em;
             font-weight: lighter;
         }
+        #view_main_detail_btn{
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+            /*margin: 6px;*/
+            /*padding: 0 10px;*/
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            height: 29px;
+            line-height: 29px;
+            text-align: center;
+            font-family: Helvetica;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 1);
+            font-size: 13px;
+            font-weight: bold;
+            vertical-align: middle;
+
+            border-width: 1px;
+            border-style: solid;
+            border-color: #2f3740 #405a7e #375073 #3a4755;
+            -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.305);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.305);
+
+            color: #ffffff;
+            background-color: #5877a2;
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#222222), to(#4a6c9b), color-stop(0.02, #8ea4c1), color-stop(0.5, #5877a2), color-stop(0.5, #476999));
+            background-image: linear-gradient(to bottom, #222222 0%, #8ea4c1 2%, #5877a2 50%, #476999 50%, #4a6c9b 100%);
+        }
     </style>
 </head>
 <body id="body" class="claro" style="width:100%; height: 100%">
@@ -134,7 +163,21 @@
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
                         view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
                     }
+
+                    if(!view_main.detailBtn) {
+                        view_main.detailBtn = new ToggleButton({
+                            label: "Детально",
+                            id:view_main.id+"_detail_btn",
+                           // style: "font-size:14px; font-weight:bold",
+                            onClick: function () {
+                                view_main.loadDetailContent()
+                            }
+                        });
+                       // view_main.detailBtn.setAttribute("class","detailBtn");
+                        view_main.dateBtnHeading.addChild(view_main.detailBtn);
+                    }
                 };
+
                 view_main.setBottomButtonsFor = function (view) {
                     var bottomHeading = registry.byId(view.id + "hf");
                     if (!bottomHeading) {
@@ -264,6 +307,8 @@
                     var bdate = view_main.btnBeginDate_dateValue.format("YYYYMMDD");
                     var edate = view_main.btnEndDate_dateValue.format("YYYYMMDD");
                     var unit_params = null;
+                    var detail= (view_main.detailBtn.get("checked"))? "&detail":"";  console.log("detail=",detail);
+                    unit_params = (unit_params === null) ? "" : "&" + unit_params;
                     var units_list = view_main.pickUnitBtn.selected_units;
                     for (var i in units_list) {
                         unit_params = "unit_id_" + i + "=" + units_list[i].id;
@@ -271,11 +316,11 @@
                     }
                     getJSONData({
                                 url: "/mobile",
-                                condition: "action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                condition: "action=get_main_data&bdate=" + bdate + "&edate=" + edate + unit_params+detail,//get_cashbalance
                                 consoleLog: true
                             }
                             , function (success, result) {
-                                if (success) {
+                                if (success) {                              console.log("view_main.loadDetailContent getJSONData result=", result);
                                     if (result.error) {
                                         alert("Нет данных");            console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
                                     } else view_main.setDetailContent(result);
