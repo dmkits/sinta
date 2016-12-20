@@ -45,13 +45,13 @@
 <body id="body" class="claro" style="width:100%; height: 100%">
 </body>
 <script>
-    require([  "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
+    require(["dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
                 "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
                 "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
                 "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator"],
 
             function (xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
-                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView,ProgressIndicator) {
+                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator) {
                 moment.locale("uk");
                 numeral.language('ru-UA');
 
@@ -96,7 +96,7 @@
                     view_main.pickUnitBtn.set("style", "width:" + v + "px; font-size:14px; align: center");
                 };
                 pickUnitBtnHeading.addChild(view_main.pickUnitBtn);
-                view_main.createTopButtonsFor = function (view) {
+                view_main.setTopButtonsFor = function (view) {
                     if (!view.dateBtnHeading) {
                         var dateBtnHeading = new Heading({
                             fixed: "top"
@@ -135,7 +135,7 @@
                         view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
                     }
                 };
-                view_main.createBottomButtonsFor = function (view) {
+                view_main.setBottomButtonsFor = function (view) {
                     var bottomHeading = registry.byId(view.id + "hf");
                     if (!bottomHeading) {
                         bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");
@@ -220,7 +220,7 @@
                  }*/
                 view_main.loadMainContent = function () {
                     getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true}
-                            , function (success, result) {                                                      console.log("view_main.loadMainContent getJSONData ", result);
+                            , function (success, result) {                      console.log("view_main.loadMainContent getJSONData ", result);
                                 if (success) {
                                     view_main.setMainContent(result);
                                 } else {//error!!!
@@ -241,8 +241,8 @@
                             view_main.pickUnitBtn.selected_units[1].short_name + " | " +
                             view_main.pickUnitBtn.selected_units[2].short_name;
                     view_main.pickUnitBtn.set("label", view_main.string_units);
-                    view_main.createTopButtonsFor(view_main);
-                    view_main.createBottomButtonsFor(view_main);
+                    view_main.setTopButtonsFor(view_main);
+                    view_main.setBottomButtonsFor(view_main);
                     view_main.inner_scroll.startup();
                     view_main.startup();
                     if (!view_main.btnBeginDate.label) view_main.todayBtn.onClick();
@@ -250,12 +250,16 @@
                     //          20161001    201610131
                     //  var cashbalance = loadMobileDataFromServer("/mobile?action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params);
                 };
-                view_main.loadDetailContent = function () {                                                             console.log("LoadDetailContent");
+                view_main.loadDetailContent = function () {
                     var view_main_list_items = registry.byId("view_main_list_items");
-                    if(view_main_list_items) {view_main_list_items.destroy()}
-                    if(view_main.prog) {view_main.prog.destroy()}
-                        view_main.prog = new ProgressIndicator({size: 200, center: true});
-                        document.getElementById('body').appendChild(view_main.prog.domNode);
+                    if (view_main_list_items) {
+                        view_main_list_items.destroy()
+                    }
+                    if (view_main.prog) {
+                        view_main.prog.destroy()
+                    }
+                    view_main.prog = new ProgressIndicator({size: 200, center: true});
+                    document.getElementById('body').appendChild(view_main.prog.domNode);
                     view_main.prog.start();
                     var bdate = view_main.btnBeginDate_dateValue.format("YYYYMMDD");
                     var edate = view_main.btnEndDate_dateValue.format("YYYYMMDD");
@@ -273,20 +277,16 @@
                             , function (success, result) {
                                 if (success) {
                                     if (result.error) {
-                                        alert("Нет данных");        console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
-                                }else view_main.setDetailContent(result);
+                                        alert("Нет данных");            console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                    } else view_main.setDetailContent(result);
                                 } else {//error!!!
                                     alert("Нет данных");
                                 }
-//                                setTimeout(function(){
-//                                    view_main.prog.stop()
-//                                }, 5000);
                                 view_main.prog.stop();
-                            });
+                            }
+                    );
                 };
-                view_main.setDetailContent = function (balance_data) {                            console.log("view_main.setDetailContent balance_data=", balance_data);
-//                    var view_main_list_items = registry.byId("view_main_list_items");
-//                    if (view_main_list_items) view_main_list_items.destroy();
+                view_main.setDetailContent = function (balance_data) {
                     var view_main_list_items = new roundRectList({
                         style: "position:relative",
                         "id": "view_main_list_items"
@@ -318,7 +318,6 @@
                             list_item.url = dataItem.url;
                             list_item.actionValue = dataItem.action;
                             list_item.onClick = function () {
-                                // this.set("selected", "false");
                                 var view = view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue);
                             }
                         }
@@ -359,63 +358,57 @@
                         view.inner_scroll = new ScrollableView({}, view.id + "sv");
                         view.url = url;
                         view.addChild(top_heading, 0);
-                        createPickBtnFor(view);
+                        setPickBtnFor(view);
                         view.addChild(view.inner_scroll);
-                        view_main.createTopButtonsFor(view);
-                        view_main.createBottomButtonsFor(view);
+                        view_main.setTopButtonsFor(view);
+                        view_main.setBottomButtonsFor(view);
                         view.inner_scroll.startup();
                         view.startup();
 
-                    view.loadDetailContent = function () {
-                       // var list_items = registry.byId("list" + this.id);
-                        if (view.list_items) {
-                            view.list_items.destroy();
-                        }
-                        if(view.prog) {view.prog.destroy()}
-                            view.prog = new ProgressIndicator({size: 200, center: true, removeOnStop:true});
+                        view.loadDetailContent = function () {
+                            if (view.list_items) {
+                                view.list_items.destroy();
+                            }
+                            if (view.prog) {
+                                view.prog.destroy()
+                            }
+                            view.prog = new ProgressIndicator({size: 200, center: true, removeOnStop: true});
                             document.getElementById('body').appendChild(view.prog.domNode);
 
-                        view.prog.start();
-                        var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
-                        var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
-                        var unit_params = null;
-                        var units_list = view_main.pickUnitBtn.selected_units;
-                        for (var i in units_list) {
-                            unit_params = "unit" + i + "=id:" + units_list[i].id;
-                            unit_params = (unit_params === null) ? "" : "&" + unit_params;
-                        }
-                        getJSONData({
-                                    //  url: "mobile/cashin_sum.json"
-                                    url: view.url,
-                                    condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + unit_params,
-                                    consoleLog: true
-                                }
-                                , function (success, result) {
-                                    if (success) {
-                                        if (result.error)
-                                        {
-                                            alert("Нет данных");          console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
-                                        }else view.setDetailContent(result.items);
-                                    } else {
-                                        alert("Нет связи с сервером");
+                            view.prog.start();
+                            var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
+                            var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
+                            var unit_params = null;
+                            var units_list = view_main.pickUnitBtn.selected_units;
+                            for (var i in units_list) {
+                                unit_params = "unit" + i + "=id:" + units_list[i].id;
+                                unit_params = (unit_params === null) ? "" : "&" + unit_params;
+                            }
+                            getJSONData({
+                                        //  url: "mobile/cashin_sum.json"
+                                        url: view.url,
+                                        condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                        consoleLog: true
                                     }
-                                    view.prog.stop();
-                                }
-                        );
-                    }
+                                    , function (success, result) {
+                                        if (success) {
+                                            if (result.error) {
+                                                alert("Нет данных");         console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                            } else view.setDetailContent(result.items);
+                                        } else {
+                                            alert("Нет связи с сервером");
+                                        }
+                                        view.prog.stop();
+                                    }
+                            );
+                        }
 
-                    }else{
-                        createPickBtnFor(view);
-                        view_main.createTopButtonsFor(view);
-                       // view.loadDetailContent();
+                    } else {
+                        setPickBtnFor(view);
+                        view_main.setTopButtonsFor(view);
                     }
-                    view.setDetailContent = function (data) {                             console.log("view.setDetailContent=" + this.id + " data=", data);
-                        // var data;
-//                        var list_items = registry.byId("list" + this.id);
-//                        if (view.list_items) {
-//                            view.list_items.destroy();
-//                        }
-                      view.list_items = new roundRectList({"id": "list" + this.id});
+                    view.setDetailContent = function (data) {
+                        view.list_items = new roundRectList({"id": "list" + this.id});
                         this.inner_scroll.addChild(view.list_items);
                         /*
                          [
@@ -428,7 +421,6 @@
                          */
                         for (var i in data) {
                             var dataItem = data[i];
-                            // var string_sum = numeral(dataItem.sum).format('0,0');
                             var item = new ListItem({
                                 style: "background-color:white",
                                 label: dataItem.label,
@@ -485,7 +477,7 @@
                         var selected_date = moment(date_picker.get("value"));
                         btn.set("label", selected_date.format("DD.MM.YYYY"));
                         if (btn.id == "date_first_" + view.id) {
-                            view.btnBeginDate_dateValue = selected_date;                      console.log("view.btnBeginDate_dateValue=", (new Date(view.btnBeginDate_dateValue)).getTime());
+                            view.btnBeginDate_dateValue = selected_date;
                         }
                         if (btn.id == "date_last_" + view.id) {
                             view.btnEndDate_dateValue = selected_date;
@@ -503,7 +495,6 @@
                 var showPickUnitView = function (btn, view) {
                     var pick_view = registry.byId(view.id + "_pick_unit");
                     if (!pick_view) {
-                   // if(pick_view){pick_view.destroy();}
                         var view_div = document.createElement("div");
                         view_div.setAttribute("id", view.id + "_pick_unit");
                         document.getElementById("body").appendChild(view_div);
@@ -516,7 +507,7 @@
                         });
                         top_heading.startup();
                         pick_view.addChild(top_heading, 0);
-                   }
+                    }
                     pick_view.listUnitButtons = [];
                     var data;
                     var list_of_units = registry.byId(view.id + "list_of_units");
@@ -525,7 +516,7 @@
                         style: "background-color:white",
                         "id": view.id + "list_of_units"
                     });
-                    pick_view.addChild(list_of_units);
+                    pick_view.addChild(list_of_units, 1);
                     list_of_units.startup();
                     data = btn.units_data;
                     for (var i in data) {
@@ -550,45 +541,41 @@
                         }
                     }
                     list_of_units.startup();
-                    //view.accept_heading = registry.byId(view.id + "accept_heading");
                     if (!view.accept_heading) {
                         view.accept_heading = new Heading({id: view.id + "accept_heading"});
                     }
-                 //   view.confirmBtn = registry.byId(view.id + "confirmBtn");
                     if (!view.confirmBtn) {
                         view.confirmBtn = new ToolBarButton({
                             transition: "fade",
                             id: view.id + "confirmBtn",
                             label: "Выбрать",
+                            parentBtn: btn,
                             onClick: function () {
-                                btn.selected_units = [];
+                                this.parentBtn.selected_units = [];
                                 view.string_units = "";
                                 var d = 0;
                                 for (var j = 0; j < pick_view.listUnitButtons.length; j++) {
                                     var dataItem = data[j];
                                     if (pick_view.listUnitButtons[j].get("checked") == true) {
                                         view.string_units += "" + dataItem.short_name + " | ";
-                                        btn.selected_units[d] = dataItem;
+                                        this.parentBtn.selected_units[d] = dataItem;
                                         d++;
                                     }
                                 }
-                                if (btn.selected_units.length < 1) {
-                                    //
-                                } else {
+                                if (this.parentBtn.selected_units.length >0) {
                                     view.confirmBtn.set("moveTo", view.id);
                                     view.string_units = view.string_units.slice(0, view.string_units.length - 3);
-                                                                                                                        console.log("view.string_units=",view.string_units, btn);
-                                    btn.set("label", view.string_units+"123546789")
+                                    this.parentBtn.set("label", view.string_units)
                                 }
                             }
                         });
                         pick_view.addChild(view.accept_heading);
-                        view.accept_heading.addChild(view.confirmBtn);
+                        view.accept_heading.addChild(view.confirmBtn, 2);
                         view.accept_heading.startup();
                         view.startup();
-                    }                                                                                                   console.log("btn.selected_units=", btn.selected_units);
+                    }
                 };
-                var createPickBtnFor = function (view) {
+                var setPickBtnFor = function (view) {
                     if (!view.pickUnitBtnHeading) {
                         view.pickUnitBtnHeading = new Heading();
                         var icon_btn = new ToolBarButton({
@@ -601,20 +588,19 @@
                         view.addChild(view.pickUnitBtnHeading);
                         view.pickUnitBtnHeading.startup();
                     }
-                    if (view.pickUnitBtn) view.pickUnitBtn.destroy();
-                    view.pickUnitBtn = new ToolBarButton({
-                        style: "width:" + v + "px; font-size:14px; align: center",
-                        transition: "fade",
-                        moveTo: view.id + "_pick_unit",
-                        onClick: function () {
-                            showPickUnitView(this, view);
-                        }
-                    });
+                    if (!view.pickUnitBtn)
+                        view.pickUnitBtn = new ToolBarButton({
+                            style: "width:" + v + "px; font-size:14px; align: center",
+                            transition: "fade",
+                            moveTo: view.id + "_pick_unit",
+                            onClick: function () {
+                                showPickUnitView(this, view);
+                            }
+                        });
                     view.pickUnitBtn.units_data = view_main.pickUnitBtn.units_data;
-                    view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;    console.log("btn.view.pickUnitBtn.selected_units=", view.pickUnitBtn.selected_units);
-                    view.pickUnitBtn.set("label", view_main.string_units);                     console.log("view_main.string_units=", view_main.string_units);
+                    view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
+                    view.pickUnitBtn.set("label", view_main.string_units);
                     view.pickUnitBtnHeading.addChild(view.pickUnitBtn);
-
                     window.onresize = function () {
                         v = window.innerWidth - 90;
                         view.pickUnitBtn.set("style", "width:" + v + "px; font-size:14px; align: center");
