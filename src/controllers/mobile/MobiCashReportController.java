@@ -42,11 +42,20 @@ public class MobiCashReportController extends PageController {
             HashMap<String,String> params = getReqParams(req);
             String sBDate = params.get("bdate");
             String sEDate = params.get("edate");
-            DMSimpleQuery.instance("select SUM(TSumCC_wt) from t_Sale where DocDate BETWEEN ?  AND ?")
+            DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as SALE_SUM from t_Sale where DocDate BETWEEN ?  AND ?")
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
-                    .putResultItemValueTo(outData, "sale_sum");
-            //outData.put("items",new Object[]{});
+                    .replaceResultItemName("SALE_SUM", "value")
+                    .addToResultItem("label", "Реализация")
+                    .addResultItemToList(outData, "items");
+
+            DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as RET_SUM from t_CRRet where DocDate BETWEEN ?  AND ?")
+                    .setParameter(sBDate).setParameter(sEDate)
+                    .select(getSessionDBUS(session))
+                    .replaceResultItemName("RET_SUM", "value")
+                    .addToResultItem("label", "Возвраты")
+                    .addResultItemToList(outData, "items");
+
         } else if(sAction.equals("get_cashbalance")){
             try {
                 HashMap<String,String> params = getReqParams(req);
