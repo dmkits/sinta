@@ -9,129 +9,272 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static model.core.DMBase.*;
 import static model.core.DMData.*;
 import static model.core.DMField.*;
+
 /**
  * Created by dmkits on 30.11.2016.
  */
 public class MobiCashReportController extends PageController {
 
     public MobiCashReportController() {
-        sURL="/mobile"; sPAGE_URL="/mobile/main.html";
+        sURL = "/mobile";
+        sPAGE_URL = "/mobile/main.html";
     }
 
     @Override
     protected boolean doGetAction(String sAction, HttpServletRequest req, HttpSession session, HashMap outData) throws Exception {
-        if(sAction.equals("get_units")){
+        if (sAction.equals("get_units")) {
             outData.put("head", "Магазины");
             //outData.put("head", addStrParameter("title","Магазины") );
             try {
-                String sTableName = "r_Stocks";
-                DMMetadata.newMetadata(sTableName, "ChID", ftype_INTEGER)
-                        .addField("id", sTableName, "StockID", ftype_INTEGER)
-                        .addFieldFunction("short_name", "", null, "REPLACE(StockName,'Магазин IN UA ','')")
-                        .addField("name", sTableName, "StockName", ftype_STRING)
-                        .addWhereCondition("StockID",">",0)
-                        .selectList(getSessionDBUS(session)).putResultListTo(outData, "units");
-            } catch (Exception e){
-                outData.put("error",e.getLocalizedMessage());
+                DMSimpleQuery.instance(
+                        "select StockID,StockName, REPLACE(StockName,'Магазин IN UA ','') as SHORT_NAME, "
+                                + " StockID , StockName "
+                                + "from r_Stocks where StockID>0 and StockID<10")
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("SHORT_NAME", "short_name")
+                        .replaceResultItemName("StockID", "id")
+                        .replaceResultItemName("StockName", "name")
+                        .addResultToList(outData, "units");
+
+            } catch (Exception e) {
+                outData.put("error", e.getLocalizedMessage());
             }
-        } else if(sAction.equals("get_main_data")){
-            HashMap<String,String> params = getReqParams(req);
+        } else if (sAction.equals("get_main_data")) {
+
+            HashMap<String, String> params = getReqParams(req);
+//                for (Map.Entry<String, String> entry : params.entrySet())
+//                {
+//                        System.out.println(entry.getKey() + "/" + entry.getValue());
+//                }
             String sBDate = params.get("bdate");
             String sEDate = params.get("edate");
-            DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as SALE_SUM from t_Sale where DocDate BETWEEN ?  AND ?")
+
+            if (params.containsKey("detail")) {
+                DMSimpleQuery.instance(
+                                "select 'Sales'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Реализация ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as SALE_SUM "
+                                + "from t_Sale s "
+                                + "inner join r_Stocks st on st.StockID=s.StockID "
+                                + "where s.StockID in (1,2,3) AND s.DocDate BETWEEN ?  AND ? "
+                                + "group by st.StockID,st.StockName")
+                        .setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("SALE_SUM", "value")
+                        .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("ID", "id")
+                        //.addToResultItem("url", "/mobile")
+                        .addResultToList(outData, "items");
+
+                    DMSimpleQuery.instance("select 'Returns'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Возвраты ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as RET_SUM "
+                        + "from t_CRRet r "
+                                + "inner join r_Stocks st on st.StockID=r.StockID "
+                        + "where r.StockID in (1,2,3) AND r.DocDate BETWEEN ?  AND ? "
+                        + "group by st.StockID,st.StockName")
+                        .setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("RET_SUM", "value")
+                            .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("ID", "id")
+                                //.addToResultItem("url", "/mobile")
+                        .addResultToList(outData, "items");
+
+                DMSimpleQuery.instance("SELECT ( " +
+                        " SELECT COALESCE(SUM(pays.SumCC_wt),0) " +
+                        " FROM t_SalePays pays " +
+                        " INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode=1 AND sales.DocDate BETWEEN ?  AND ? ) " +
+                        " -(SELECT COALESCE(sum(pays.SumCC_wt),0) " +
+                        " FROM t_CRRetPays pays " +
+                        " INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode=1 AND returns.DocDate BETWEEN ?  AND ? ) " +
+                        " as CASH_INCOME;")
+
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("CASH_INCOME", "value")
+                        .addToResultItem("label", "Выручка нал")
+                        //.addToResultItem("action", "cash_detail_view")
+                        .addToResultItem("id", "cash_income1")
+                        //.addToResultItem("url", "/mobile")
+                        .addResultToList(outData, "items");
+
+//                DMSimpleQuery.instance("SELECT COALESCE(\n" +
+//                        "  (\n" +
+//                        "    SELECT SUM(pays.SumCC_wt)\n" +
+//                        "FROM t_SalePays pays\n" +
+//                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+//                        " WHERE pays.PayformCode=2\n" +
+//                        "AND sales.DocDate BETWEEN ?  AND ?" +
+//                        "  )\n" +
+//                        "  -\n" +
+//                        "  (\n" +
+//                        "    SELECT sum(pays.SumCC_wt)\n" +
+//                        " FROM t_CRRetPays pays\n" +
+//                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+//                        " WHERE pays.PayformCode=2\n" +
+//                        "       AND returns.DocDate BETWEEN ?  AND ?" +
+//                        "  ),0) as CARD_INCOME")
+//                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+//                        .select(getSessionDBUS(session))
+//                        .replaceResultItemName("CARD_INCOME", "value")
+//                        .addToResultItem("label", "Выручка ПК")
+//                        .addToResultItem("id", "card_income")
+//                        .addToResultItem("url", "/mobile")
+//                        .addResultItemToList(outData, "items");
+//
+//                DMSimpleQuery.instance("SELECT COALESCE(\n" +
+//                        "  (\n" +
+//                        "    SELECT SUM(pays.SumCC_wt)\n" +
+//                        "FROM t_SalePays pays\n" +
+//                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+//                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
+//                        "AND sales.DocDate BETWEEN ?  AND ?" +
+//                        "  )\n" +
+//                        "  -\n" +
+//                        "  (\n" +
+//                        "    SELECT sum(pays.SumCC_wt)\n" +
+//                        " FROM t_CRRetPays pays\n" +
+//                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+//                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
+//                        "       AND returns.DocDate BETWEEN ?  AND ?" +
+//                        "  ),0) as ELSE_INCOME")
+//                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+//                        .select(getSessionDBUS(session))
+//                        .replaceResultItemName("ELSE_INCOME", "value")
+//                        .addToResultItem("label", "Выручка прочее")
+//                        .addToResultItem("id", "else_income")
+//                        .addToResultItem("url", "/mobile")
+//                        .addResultItemToList(outData, "items");
+
+            } else {
+                DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as SALE_SUM from t_Sale where DocDate BETWEEN ?  AND ?")
+                        .setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("SALE_SUM", "value")
+                        .addToResultItem("label", "Реализация")
+                        .addToResultItem("id", "sales")
+                        .addToResultItem("url", "/mobile")
+                        .addResultItemToList(outData, "items");
+
+                DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as RET_SUM from t_CRRet where DocDate BETWEEN ?  AND ?")
+                        .setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("RET_SUM", "value")
+                        .addToResultItem("label", "Возвраты")
+                        .addToResultItem("id", "returns")
+                        .addToResultItem("url", "/mobile")
+                        .addResultItemToList(outData, "items");
+
+                DMSimpleQuery.instance("SELECT (\n" +
+                        "SELECT COALESCE(SUM(pays.SumCC_wt),0)\n" +
+                        "FROM t_SalePays pays\n" +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+                        "WHERE pays.PayformCode=1 AND sales.DocDate BETWEEN ?  AND ? )\n" +
+                        "  -(SELECT COALESCE(sum(pays.SumCC_wt),0)\n" +
+                        " FROM t_CRRetPays pays\n" +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+                        " WHERE pays.PayformCode=1 AND returns.DocDate BETWEEN ?  AND ?) as CASH_INCOME")
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("CASH_INCOME", "value")
+                        .addToResultItem("label", "Выручка нал")
+                        .addToResultItem("action", "cash_detail_view")
+                        .addToResultItem("id", "cash_income")
+                        .addToResultItem("url", "/mobile")
+                        .addResultItemToList(outData, "items");
+
+                DMSimpleQuery.instance("SELECT COALESCE(\n" +
+                        "  (\n" +
+                        "    SELECT SUM(pays.SumCC_wt)\n" +
+                        "FROM t_SalePays pays\n" +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+                        " WHERE pays.PayformCode=2\n" +
+                        "AND sales.DocDate BETWEEN ?  AND ?" +
+                        "  )\n" +
+                        "  -\n" +
+                        "  (\n" +
+                        "    SELECT sum(pays.SumCC_wt)\n" +
+                        " FROM t_CRRetPays pays\n" +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+                        " WHERE pays.PayformCode=2\n" +
+                        "       AND returns.DocDate BETWEEN ?  AND ?" +
+                        "  ),0) as CARD_INCOME")
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("CARD_INCOME", "value")
+                        .addToResultItem("label", "Выручка ПК")
+                        .addToResultItem("id", "card_income")
+                        .addToResultItem("url", "/mobile")
+                        .addResultItemToList(outData, "items");
+
+                DMSimpleQuery.instance("SELECT COALESCE(\n" +
+                        "  (\n" +
+                        "    SELECT SUM(pays.SumCC_wt)\n" +
+                        "FROM t_SalePays pays\n" +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
+                        "AND sales.DocDate BETWEEN ?  AND ?" +
+                        "  )\n" +
+                        "  -\n" +
+                        "  (\n" +
+                        "    SELECT sum(pays.SumCC_wt)\n" +
+                        " FROM t_CRRetPays pays\n" +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
+                        "       AND returns.DocDate BETWEEN ?  AND ?" +
+                        "  ),0) as ELSE_INCOME")
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("ELSE_INCOME", "value")
+                        .addToResultItem("label", "Выручка прочее")
+                        .addToResultItem("id", "else_income")
+                        .addToResultItem("url", "/mobile")
+                        .addResultItemToList(outData, "items");
+            }
+
+        } else if (sAction.equals("cash_detail_view")) {
+            HashMap<String, String> params = getReqParams(req);
+            String sBDate = params.get("bdate");
+            String sEDate = params.get("edate");
+            DMSimpleQuery.instance("SELECT SUM(pays.SumCC_wt) AS CASH_SALE_SUM\n" +
+                    "FROM t_SalePays pays\n" +
+                    "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
+                    "WHERE pays.PayformCode=1\n" +
+                    "AND sales.DocDate BETWEEN  ?  AND ?")
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
-                    .replaceResultItemName("SALE_SUM", "value")
-                    .addToResultItem("label", "Реализация")
+                    .replaceResultItemName("CASH_SALE_SUM", "value")
+                    .addToResultItem("label", "Продажи нал")
                     .addResultItemToList(outData, "items");
 
-            DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as RET_SUM from t_CRRet where DocDate BETWEEN ?  AND ?")
+            DMSimpleQuery.instance("SELECT sum(pays.SumCC_wt)AS CASH_RETURN_SUM\n" +
+                    "FROM t_CRRetPays pays\n" +
+                    "  INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+                    "WHERE pays.PayformCode=1\n" +
+                    "      AND returns.DocDate BETWEEN  ?  AND ?")
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
-                    .replaceResultItemName("RET_SUM", "value")
-                    .addToResultItem("label", "Возвраты")
+                    .replaceResultItemName("CASH_RETURN_SUM", "value")
+                    .addToResultItem("label", "Возвраты нал")
                     .addResultItemToList(outData, "items");
 
-        } else if(sAction.equals("get_cashbalance")){
-            try {
-                HashMap<String,String> params = getReqParams(req);
-                String sBDate = params.get("bdate");
-                String sEDate = params.get("edate");
-//                String sTableName = "if_SelectCRBalance(1)";
-                ArrayList<HashMap<String,Object>> res =
-                        getSessionDBUS(session)
-                                .getDataListFromSQLQuery(
-                                        "select * from if_SelectCRBalance(?,?,?)"
-                                        ,new Object[]{1, sBDate, sEDate}
-                                        ,addStrParameter("ItemID","id",
-                                                addStrParameter("ItemName","label",
-                                                        addStrParameter("SumCC","value"))) );
-                res.add(0,
-                        DMMetadata.newMetadata("t_Sale", "ChID", ftype_INTEGER)
-                                .cloneWithoutFields()
-                                .addFieldFunction("value", FUNC_SUMNOTNULL, null, "TSumCC_wt")
-                                .addWhereCondition("DocDate", ">=", sBDate)
-                                .addWhereCondition("DocDate", "<=", sEDate)
-                                .selectList(getSessionDBUS(session))
-                                .putToSelectResultItemValue("id", 0)
-                                .putToSelectResultItemValue("label", "Реализация")
-                                .putToSelectResultItemValue("url", "/mobile")
-                                .putToSelectResultItemValue("action", "get_sales")
-                                .getSelectResultItemValues());
+            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_IN_SUM FROM t_monIntRec WHERE DocDate BETWEEN  ?  AND ?")
+                    .setParameter(sBDate).setParameter(sEDate)
+                    .select(getSessionDBUS(session))
+                    .replaceResultItemName("CASH_IN_SUM", "value")
+                    .addToResultItem("label", "Вносы нал")
+                    .addResultItemToList(outData, "items");
 
-                res.add(1,
-                        DMMetadata.newMetadata("t_CRRet", "ChID", ftype_INTEGER)
-                                .cloneWithoutFields()
-                                .addFieldFunction("value", FUNC_SUMNOTNULL, null, "TSumCC_wt")
-                                .addWhereCondition("DocDate", ">=", sBDate)
-                                .addWhereCondition("DocDate", "<=", sEDate)
-                                .selectList(getSessionDBUS(session))
-                                .putToSelectResultItemValue("id", 1)
-                                .putToSelectResultItemValue("label", "Возвраты")
-                                .putToSelectResultItemValue("url", "/mobile")
-                                .putToSelectResultItemValue("action", "get_returns")
-                                .getSelectResultItemValues());
-                outData.put("cashbalance",res);
-            } catch (Exception e){
-                outData.put("error",e.getLocalizedMessage());
-            }
-        } else if(sAction.equals("get_sales")){
-            HashMap<String,String> params = getReqParams(req);
-            String sBDate = params.get("bdate");
-            String sEDate = params.get("edate");
-            DMMetadata.newMetadata("t_Sale", "ChID", ftype_INTEGER)
-                    .cloneWithFields()
-                    .joinSource("t_SaleD", "ChID", "t_Sale", "ChID")
-                    .joinSource("r_Prods","ProdID","t_SaleD", "ProdID")
-                    .joinSource("r_ProdC", "PCatID", "r_Prods", "PCatID")
-                    .addGroupedField("label", "r_ProdC", "PCatName")
-                    .addFieldFunction("value", FUNC_SUMNOTNULL, "t_SaleD", "SumCC_wt")
-                    .addWhereCondition("DocDate", ">=", sBDate)
-                    .addWhereCondition("DocDate", "<=", sEDate)
-                    .addOrder("SUM(SumCC_wt) DESC")
-                    .selectList(getSessionDBUS(session))
-                    .putResultListTo(outData,"items");
-
-        } else if(sAction.equals("get_returns")){
-            HashMap<String,String> params = getReqParams(req);
-            String sBDate = params.get("bdate");
-            String sEDate = params.get("edate");
-            DMMetadata.newMetadata("t_CRRet", "ChID", ftype_INTEGER)
-                    .cloneWithFields()
-                    .joinSource("t_CRRetD", "ChID", "t_CRRet", "ChID")
-                    .joinSource("r_Prods","ProdID","t_CRRetD", "ProdID")
-                    .joinSource("r_ProdC", "PCatID", "r_Prods", "PCatID")
-                    .addGroupedField("label", "r_ProdC", "PCatName")
-                    .addFieldFunction("value", FUNC_SUMNOTNULL, "t_CRRetD", "SumCC_wt")
-                    .addWhereCondition("DocDate", ">=", sBDate)
-                    .addWhereCondition("DocDate", "<=", sEDate)
-                    .addOrder("SUM(SumCC_wt) DESC")
-                    .selectList(getSessionDBUS(session))
-                    .putResultListTo(outData,"items");
+            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_OUT_SUM FROM t_monIntExp WHERE DocDate BETWEEN  ?  AND ?")
+                    .setParameter(sBDate).setParameter(sEDate)
+                    .select(getSessionDBUS(session))
+                    .replaceResultItemName("CASH_OUT_SUM", "value")
+                    .addToResultItem("label", "Выносы нал")
+                    .addResultItemToList(outData, "items");
         } else return false;
         return true;
     }
