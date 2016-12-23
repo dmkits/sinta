@@ -114,7 +114,7 @@
                 var v = window.innerWidth - 90;
                 view_main.pickUnitBtn = new ToolBarButton({
                     style: "width:" + v + "px; font-size:14px; align: center",
-                    transition: "fade",
+                    transition: "none",
                     moveTo: "view_main_pick_unit",
                     onClick: function () {
                         showPickUnitView(this, view_main)
@@ -136,7 +136,7 @@
                     if (!view.btnBeginDate) {
                         view.btnBeginDate = new ToolBarButton({
                             moveTo: "calendar_view", id: "date_first_" + view.id,
-                            transition: "fade",
+                            transition: "none",
                             onClick: function () {
                                 showCalendarView(this, "Начальная дата", view)
                             }
@@ -151,7 +151,7 @@
                     if (!view.btnEndDate) {
                         view.btnEndDate = new ToolBarButton({
                             moveTo: "calendar_view", id: "date_last_" + view.id,
-                            transition: "fade",
+                            transition: "none",
                             onClick: function () {
                                 showCalendarView(this, "Конечная дата", view)
                             }
@@ -179,13 +179,27 @@
                 };
 
                 view_main.setBottomButtonsFor = function (view) {
+                    var tr = registry.byId(view.id + "hfbh");
                     var bottomHeading = registry.byId(view.id + "hf");
                     if (!bottomHeading) {
                         bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");
                         bottomHeading.startup();
                     }
+                    if(!tr){
+                        var table = document.createElement('table');
+                        table.setAttribute("align","center");
+                        var tbody=document.createElement('tbody');
+                        var tr=document.createElement('tr');
+                        var td=document.createElement('td');
+                        td.setAttribute("aling","center");
+                        bottomHeading.domNode.appendChild(table);
+                        table.appendChild(tbody);
+                        tbody.appendChild(tr);
+                        tr.appendChild(td);
+                    }
                     if (!view.todayBtn) {
                         var bottom_btn1 = new ToolBarButton({
+                            style:"padding-left:4px;padding-right:4px; ",
                             label: "Сегодня",
                             clickable: "true"
                         });
@@ -199,10 +213,13 @@
                             view.loadDetailContent();
                         };
                         view.todayBtn = bottom_btn1;
-                        bottomHeading.addChild(view.todayBtn);
+                      //  bottomHeading.addChild(view.todayBtn);
+                        tr.appendChild(view.todayBtn.domNode);
+                        view.todayBtn.startup();
                     }
                     if (!view.yesterdayBtn) {
                         var bottom_btn2 = new ToolBarButton({
+                            style:"padding-left:4px;padding-right:4px; ",
                             label: "Вчера",
                             clickable: "true"
                         });
@@ -216,10 +233,13 @@
                             view.loadDetailContent();
                         };
                         view.yesterdayBtn = bottom_btn2;
-                        bottomHeading.addChild(view.yesterdayBtn);
+                       // bottomHeading.addChild(view.yesterdayBtn);
+                        tr.appendChild(view.yesterdayBtn.domNode);
+                        view.yesterdayBtn.startup();
                     }
                     if (!view.weekBtn) {
                         var bottom_btn3 = new ToolBarButton({
+                            style:"padding-left:4px;padding-right:4px; ",
                             label: "Неделя", clickable: "true"
                         });
                         bottom_btn3.onClick = function () {
@@ -232,10 +252,13 @@
                             view.loadDetailContent();
                         };
                         view.weekBtn = bottom_btn3;
-                        bottomHeading.addChild(view.weekBtn);
+                        //bottomHeading.addChild(view.weekBtn);
+                        tr.appendChild(view.weekBtn.domNode);
+                        view.weekBtn.startup();
                     }
                     if (!view.monthBtn) {
                         var bottom_btn4 = new ToolBarButton({
+                            style:"padding-left:4px;padding-right:4px; ",
                             label: "Месяц",
                             clickable: "true"
                         });
@@ -249,7 +272,9 @@
                             view.loadDetailContent();
                         };
                         view.monthBtn = bottom_btn4;
-                        bottomHeading.addChild(view.monthBtn);
+                       // bottomHeading.addChild(view.monthBtn);
+                        tr.appendChild(view.monthBtn.domNode);
+                        view.monthBtn.startup();
                     } else {
                         view.btnBeginDate.set("label", view_main.btnBeginDate.label);
                         view.btnEndDate.set("label", view_main.btnEndDate.label);
@@ -338,7 +363,7 @@
                     });
                     view_main.inner_scroll.addChild(view_main_list_items);
                     view_main_list_items.startup();
-                    var data = balance_data.cashbalance;
+                    var data = balance_data.items;
                     for (var i in data) {
                         var dataItem = data[i], listItemIdPrefix = "mainListItem_";
                         var list_item = registry.byId(listItemIdPrefix + dataItem.id);
@@ -347,7 +372,8 @@
                             id: listItemIdPrefix + dataItem.id,
                             label: dataItem.label,
                             rightText: string_value,
-                            moveTo: "view_" + dataItem.id
+                            moveTo: "view_" + dataItem.id,
+                            transition:"none"
                         });
                         if (dataItem.icon) {
                             list_item.set("icon", dataItem.icon);
@@ -359,14 +385,16 @@
                         if (!dataItem.style) {
                             list_item.set("style", "background-color:white")
                         }
-                        if (dataItem.url) {
+                        if(dataItem.url){
                             list_item.url = dataItem.url;
+                        }
+                        if (dataItem.action) {
                             list_item.actionValue = dataItem.action;
                             list_item.onClick = function () {
                                 var view = view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue);
                             }
                         }
-                        if (!dataItem.url) {
+                        if (!dataItem.action) {
                             list_item.set({
                                 preventTouch: true,
                                 noArrow: true
@@ -396,6 +424,7 @@
                             label: heading_label,
                             back: "Назад",
                             moveTo: "view_main",
+                            transition:"none",
                             onClick: function () {
                                 view_main.loadDetailContent()
                             }
@@ -489,7 +518,7 @@
                         document.getElementById("body").appendChild(view_div);
                         calendar_view = new View({id: "calendar_view"}, "calendar_view");
                         calendar_heading = new Heading({
-                            transition: "fade",
+                            transition: "none",
                             id: "calendar_heading",
                             back: "Назад",
                             moveTo: view.id
@@ -506,7 +535,7 @@
                         accept_btn = new ToolBarButton({
                             style: "width:75px;align",
                             id: "accept_btn", label: "Выбрать",
-                            transition: "fade"
+                            transition: "none"
                         });
                         accept_heading.addChild(accept_btn);
                         calendar_view.addChild(accept_heading);
@@ -545,7 +574,7 @@
                         document.getElementById("body").appendChild(view_div);
                         pick_view = new View({id: view.id + "_pick_unit"}, view.id + "_pick_unit");
                         var top_heading = new Heading({
-                            transition: "fade",
+                            transition: "none",
                             label: "Выберите филиал",
                             back: "Назад",
                             moveTo: view.id
@@ -591,7 +620,7 @@
                     }
                     if (!view.confirmBtn) {
                         view.confirmBtn = new ToolBarButton({
-                            transition: "fade",
+                            transition: "none",
                             id: view.id + "confirmBtn",
                             label: "Выбрать",
                             parentBtn: btn,
@@ -636,7 +665,7 @@
                     if (!view.pickUnitBtn)
                         view.pickUnitBtn = new ToolBarButton({
                             style: "width:" + v + "px; font-size:14px; align: center",
-                            transition: "fade",
+                            transition: "none",
                             moveTo: view.id + "_pick_unit",
                             onClick: function () {
                                 showPickUnitView(this, view);
