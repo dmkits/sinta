@@ -45,18 +45,12 @@ public class MobiCashReportController extends PageController {
                 outData.put("error", e.getLocalizedMessage());
             }
         } else if (sAction.equals("get_main_data")) {
-
             HashMap<String, String> params = getReqParams(req);
-//                for (Map.Entry<String, String> entry : params.entrySet())
-//                {
-//                        System.out.println(entry.getKey() + "/" + entry.getValue());
-//                }
             String sBDate = params.get("bdate");
             String sEDate = params.get("edate");
-
             if (params.containsKey("detail")) {
                 DMSimpleQuery.instance(
-                                "select 'Sales'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Реализация ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as SALE_SUM "
+                                "select 'sales'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Реализация ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as SALE_SUM "
                                 + "from t_Sale s "
                                 + "inner join r_Stocks st on st.StockID=s.StockID "
                                 + "where s.StockID in (1,2,3) AND s.DocDate BETWEEN ?  AND ? "
@@ -69,7 +63,7 @@ public class MobiCashReportController extends PageController {
                         //.addToResultItem("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                    DMSimpleQuery.instance("select 'Returns'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Возвраты ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as RET_SUM "
+                    DMSimpleQuery.instance("select 'returns'+CAST(st.StockID as varchar(200)) as ID, st.StockName, REPLACE(st.StockName,'Магазин IN UA ','Возвраты ') as SHORT_NAME, COALESCE(SUM(TSumCC_wt),0) as RET_SUM "
                         + "from t_CRRet r "
                                 + "inner join r_Stocks st on st.StockID=r.StockID "
                         + "where r.StockID in (1,2,3) AND r.DocDate BETWEEN ?  AND ? "
@@ -82,74 +76,79 @@ public class MobiCashReportController extends PageController {
                                 //.addToResultItem("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT ( " +
-                        " SELECT COALESCE(SUM(pays.SumCC_wt),0) " +
-                        " FROM t_SalePays pays " +
-                        " INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
-                        " WHERE pays.PayformCode=1 AND sales.DocDate BETWEEN ?  AND ? ) " +
-                        " -(SELECT COALESCE(sum(pays.SumCC_wt),0) " +
-                        " FROM t_CRRetPays pays " +
-                        " INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
-                        " WHERE pays.PayformCode=1 AND returns.DocDate BETWEEN ?  AND ? ) " +
-                        " as CASH_INCOME;")
-
+                DMSimpleQuery.instance("SELECT 'cash_income'+CAST(m.StockID as varchar(200)) as ID, st.StockName,REPLACE(st.StockName,'Магазин IN UA ','Выручка НАЛ ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM " +
+                        "FROM ( " +
+                        "  SELECT sales.StockID, COALESCE(SUM(pays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID = pays.ChID " +
+                        "  WHERE sales.StockID IN (1, 2, 3) AND pays.PayformCode = 1 AND sales.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY sales.StockID " +
+                        "  UNION ALL " +
+                        "  SELECT crr.StockID, COALESCE(SUM(-crpays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_CRRetPays crpays " +
+                        "    INNER JOIN t_CRRet crr ON crr.ChID = crpays.ChID " +
+                        "  WHERE crr.StockID IN (1, 2, 3) AND crpays.PayformCode =1 " +
+                        " AND crr.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY crr.StockID " +
+                        "     ) m " +
+                        "INNER JOIN r_Stocks st on st.StockID=m.StockID " +
+                        "GROUP BY m.StockID, st.StockName; ")
                         .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
                         .select(getSessionDBUS(session))
-                        .replaceResultItemName("CASH_INCOME", "value")
-                        .addToResultItem("label", "Выручка нал")
-                        //.addToResultItem("action", "cash_detail_view")
-                        .addToResultItem("id", "cash_income1")
-                        //.addToResultItem("url", "/mobile")
+                        .replaceResultItemName("SUMM", "value")
+                        .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("ID", "id")
                         .addResultToList(outData, "items");
 
-//                DMSimpleQuery.instance("SELECT COALESCE(\n" +
-//                        "  (\n" +
-//                        "    SELECT SUM(pays.SumCC_wt)\n" +
-//                        "FROM t_SalePays pays\n" +
-//                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-//                        " WHERE pays.PayformCode=2\n" +
-//                        "AND sales.DocDate BETWEEN ?  AND ?" +
-//                        "  )\n" +
-//                        "  -\n" +
-//                        "  (\n" +
-//                        "    SELECT sum(pays.SumCC_wt)\n" +
-//                        " FROM t_CRRetPays pays\n" +
-//                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
-//                        " WHERE pays.PayformCode=2\n" +
-//                        "       AND returns.DocDate BETWEEN ?  AND ?" +
-//                        "  ),0) as CARD_INCOME")
-//                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
-//                        .select(getSessionDBUS(session))
-//                        .replaceResultItemName("CARD_INCOME", "value")
-//                        .addToResultItem("label", "Выручка ПК")
-//                        .addToResultItem("id", "card_income")
-//                        .addToResultItem("url", "/mobile")
-//                        .addResultItemToList(outData, "items");
-//
-//                DMSimpleQuery.instance("SELECT COALESCE(\n" +
-//                        "  (\n" +
-//                        "    SELECT SUM(pays.SumCC_wt)\n" +
-//                        "FROM t_SalePays pays\n" +
-//                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-//                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
-//                        "AND sales.DocDate BETWEEN ?  AND ?" +
-//                        "  )\n" +
-//                        "  -\n" +
-//                        "  (\n" +
-//                        "    SELECT sum(pays.SumCC_wt)\n" +
-//                        " FROM t_CRRetPays pays\n" +
-//                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
-//                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
-//                        "       AND returns.DocDate BETWEEN ?  AND ?" +
-//                        "  ),0) as ELSE_INCOME")
-//                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
-//                        .select(getSessionDBUS(session))
-//                        .replaceResultItemName("ELSE_INCOME", "value")
-//                        .addToResultItem("label", "Выручка прочее")
-//                        .addToResultItem("id", "else_income")
-//                        .addToResultItem("url", "/mobile")
-//                        .addResultItemToList(outData, "items");
+                DMSimpleQuery.instance("SELECT 'card_income'+CAST(m.StockID as varchar(200)) as ID, st.StockName,REPLACE(st.StockName,'Магазин IN UA ','Выручка ПК ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM " +
+                        "FROM ( " +
+                        "  SELECT sales.StockID, COALESCE(SUM(pays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID = pays.ChID " +
+                        "  WHERE sales.StockID IN (1, 2, 3) AND pays.PayformCode = 2 " +
+                        " AND sales.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY sales.StockID " +
+                        "  UNION ALL " +
+                        "  SELECT crr.StockID, COALESCE(SUM(-crpays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_CRRetPays crpays " +
+                        "    INNER JOIN t_CRRet crr ON crr.ChID = crpays.ChID " +
+                        "  WHERE crr.StockID IN (1, 2, 3) AND NOT crpays.PayformCode in (1,2) " +
+                        " AND crr.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY crr.StockID " +
+                        "     ) m " +
+                        "INNER JOIN r_Stocks st on st.StockID=m.StockID " +
+                        "GROUP BY m.StockID, st.StockName; ")
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("SUMM", "value")
+                        .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("ID", "id")
+                        .addResultToList(outData, "items");
 
+                DMSimpleQuery.instance("SELECT 'else_income'+CAST(m.StockID as varchar(200)) as ID, st.StockName,REPLACE(st.StockName,'Магазин IN UA ','Выручка прочее ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM " +
+                        "FROM ( " +
+                        "  SELECT sales.StockID, COALESCE(SUM(pays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID = pays.ChID " +
+                        "  WHERE sales.StockID IN (1, 2, 3) AND pays.PayformCode = 2 " +
+                        " AND sales.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY sales.StockID " +
+                        "  UNION ALL " +
+                        "  SELECT crr.StockID, COALESCE(SUM(-crpays.SumCC_wt), 0) as SumCC_wt " +
+                        "  FROM t_CRRetPays crpays " +
+                        "    INNER JOIN t_CRRet crr ON crr.ChID = crpays.ChID " +
+                        "  WHERE crr.StockID IN (1, 2, 3) AND NOT crpays.PayformCode in (1,2)" +
+                        " AND crr.DocDate BETWEEN ?  AND ? "+
+                        "  GROUP BY crr.StockID " +
+                        "     ) m " +
+                        "INNER JOIN r_Stocks st on st.StockID=m.StockID " +
+                        "GROUP BY m.StockID, st.StockName; ")
+                        .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
+                        .select(getSessionDBUS(session))
+                        .replaceResultItemName("SUMM", "value")
+                        .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("ID", "id")
+                        .addResultToList(outData, "items");
             } else {
                 DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as SALE_SUM from t_Sale where DocDate BETWEEN ?  AND ?")
                         .setParameter(sBDate).setParameter(sEDate)
@@ -169,14 +168,14 @@ public class MobiCashReportController extends PageController {
                         .addToResultItem("url", "/mobile")
                         .addResultItemToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT (\n" +
-                        "SELECT COALESCE(SUM(pays.SumCC_wt),0)\n" +
-                        "FROM t_SalePays pays\n" +
-                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-                        "WHERE pays.PayformCode=1 AND sales.DocDate BETWEEN ?  AND ? )\n" +
-                        "  -(SELECT COALESCE(sum(pays.SumCC_wt),0)\n" +
-                        " FROM t_CRRetPays pays\n" +
-                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
+                DMSimpleQuery.instance("SELECT ( " +
+                        "SELECT COALESCE(SUM(pays.SumCC_wt),0) " +
+                        "FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                        "WHERE pays.PayformCode=1 AND sales.DocDate BETWEEN ?  AND ? ) " +
+                        "  -(SELECT COALESCE(sum(pays.SumCC_wt),0) " +
+                        " FROM t_CRRetPays pays " +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
                         " WHERE pays.PayformCode=1 AND returns.DocDate BETWEEN ?  AND ?) as CASH_INCOME")
                         .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
                         .select(getSessionDBUS(session))
@@ -187,20 +186,16 @@ public class MobiCashReportController extends PageController {
                         .addToResultItem("url", "/mobile")
                         .addResultItemToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT COALESCE(\n" +
-                        "  (\n" +
-                        "    SELECT SUM(pays.SumCC_wt)\n" +
-                        "FROM t_SalePays pays\n" +
-                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-                        " WHERE pays.PayformCode=2\n" +
-                        "AND sales.DocDate BETWEEN ?  AND ?" +
-                        "  )\n" +
-                        "  -\n" +
-                        "  (\n" +
-                        "    SELECT sum(pays.SumCC_wt)\n" +
-                        " FROM t_CRRetPays pays\n" +
-                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
-                        " WHERE pays.PayformCode=2\n" +
+                DMSimpleQuery.instance("SELECT COALESCE( " +
+                        "  ( SELECT SUM(pays.SumCC_wt) " +
+                        "FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode=2 " +
+                        "AND sales.DocDate BETWEEN ?  AND ? )  " +
+                        "  - ( SELECT sum(pays.SumCC_wt) " +
+                        " FROM t_CRRetPays pays " +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode=2 " +
                         "       AND returns.DocDate BETWEEN ?  AND ?" +
                         "  ),0) as CARD_INCOME")
                         .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
@@ -211,20 +206,16 @@ public class MobiCashReportController extends PageController {
                         .addToResultItem("url", "/mobile")
                         .addResultItemToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT COALESCE(\n" +
-                        "  (\n" +
-                        "    SELECT SUM(pays.SumCC_wt)\n" +
-                        "FROM t_SalePays pays\n" +
-                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
-                        "AND sales.DocDate BETWEEN ?  AND ?" +
-                        "  )\n" +
-                        "  -\n" +
-                        "  (\n" +
-                        "    SELECT sum(pays.SumCC_wt)\n" +
-                        " FROM t_CRRetPays pays\n" +
-                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
-                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1\n" +
+                DMSimpleQuery.instance("SELECT COALESCE( " +
+                        "  ( SELECT SUM(pays.SumCC_wt) " +
+                        "FROM t_SalePays pays " +
+                        "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1 " +
+                        "AND sales.DocDate BETWEEN ?  AND ?) " +
+                        "  - (SELECT sum(pays.SumCC_wt) " +
+                        " FROM t_CRRetPays pays " +
+                        "   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
+                        " WHERE pays.PayformCode!=2 AND pays.PayformCode!=1 " +
                         "       AND returns.DocDate BETWEEN ?  AND ?" +
                         "  ),0) as ELSE_INCOME")
                         .setParameter(sBDate).setParameter(sEDate).setParameter(sBDate).setParameter(sEDate)
@@ -240,10 +231,10 @@ public class MobiCashReportController extends PageController {
             HashMap<String, String> params = getReqParams(req);
             String sBDate = params.get("bdate");
             String sEDate = params.get("edate");
-            DMSimpleQuery.instance("SELECT SUM(pays.SumCC_wt) AS CASH_SALE_SUM\n" +
-                    "FROM t_SalePays pays\n" +
-                    "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID\n" +
-                    "WHERE pays.PayformCode=1\n" +
+            DMSimpleQuery.instance("SELECT SUM(pays.SumCC_wt) AS CASH_SALE_SUM " +
+                    "FROM t_SalePays pays " +
+                    "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                    "WHERE pays.PayformCode=1 " +
                     "AND sales.DocDate BETWEEN  ?  AND ?")
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
@@ -251,10 +242,10 @@ public class MobiCashReportController extends PageController {
                     .addToResultItem("label", "Продажи нал")
                     .addResultItemToList(outData, "items");
 
-            DMSimpleQuery.instance("SELECT sum(pays.SumCC_wt)AS CASH_RETURN_SUM\n" +
-                    "FROM t_CRRetPays pays\n" +
-                    "  INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID\n" +
-                    "WHERE pays.PayformCode=1\n" +
+            DMSimpleQuery.instance("SELECT sum(pays.SumCC_wt)AS CASH_RETURN_SUM " +
+                    "FROM t_CRRetPays pays " +
+                    "  INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
+                    "WHERE pays.PayformCode=1 " +
                     "      AND returns.DocDate BETWEEN  ?  AND ?")
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
