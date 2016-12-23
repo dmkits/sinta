@@ -566,32 +566,30 @@
                         view.loadDetailContent();
                     }
                 };
-                var showPickUnitView = function (btn, view) {
+                var showPickUnitView = function (btn, view) {     console.log("btn.units_data=",btn.selected_units, "btn.selected_units=",btn.selected_units);
                     var pick_view = registry.byId(view.id + "_pick_unit");
                     if (!pick_view) {
-                        var view_div = document.createElement("div");
-                        view_div.setAttribute("id", view.id + "_pick_unit");
-                        document.getElementById("body").appendChild(view_div);
-                        pick_view = new View({id: view.id + "_pick_unit"}, view.id + "_pick_unit");
+                        pick_view = new View({id: view.id + "_pick_unit"});
                         var top_heading = new Heading({
                             transition: "none",
                             label: "Выберите филиал",
                             back: "Назад",
                             moveTo: view.id
                         });
+                        document.getElementById("body").appendChild(pick_view.domNode);
                         top_heading.startup();
                         pick_view.addChild(top_heading, 0);
                     }
                     pick_view.listUnitButtons = [];
                     var data;
-                    var list_of_units = registry.byId(view.id + "list_of_units");
-                    if (list_of_units) list_of_units.destroy();
-                    list_of_units = new roundRectList({
+
+                    if (pick_view.list_of_units) pick_view.list_of_units.destroy();
+                    pick_view.list_of_units = new roundRectList({
                         style: "background-color:white",
                         "id": view.id + "list_of_units"
                     });
-                    pick_view.addChild(list_of_units, 1);
-                    list_of_units.startup();
+                    pick_view.addChild(pick_view.list_of_units, 1);
+                    pick_view.list_of_units.startup();
                     data = btn.units_data;
                     for (var i in data) {
                         var dataItem = data[i];
@@ -606,47 +604,46 @@
                             style: "background-color:white"
                         });
                         for (var s in btn.selected_units) {
-                            if (tooggleBtn.unit_id == btn.selected_units[s].id) {
-                                tooggleBtn.set("checked", true);
-                            }
-                            list_of_units.addChild(item);
-                            pick_view.listUnitButtons[i] = tooggleBtn;
-                            item.addChild(tooggleBtn, 0);
+                            if (tooggleBtn.unit_id == btn.selected_units[s].id) tooggleBtn.set("checked", true);
                         }
+                        pick_view.list_of_units.addChild(item);
+                        pick_view.listUnitButtons[i] = tooggleBtn;
+                        item.addChild(tooggleBtn, 0);
                     }
-                    list_of_units.startup();
-                    if (!view.accept_heading) {
-                        view.accept_heading = new Heading({id: view.id + "accept_heading"});
+
+                    if (!pick_view.accept_heading) {
+                        pick_view.accept_heading = new Heading({id: view.id + "accept_heading"});
                     }
-                    if (!view.confirmBtn) {
-                        view.confirmBtn = new ToolBarButton({
+                    if (!pick_view.confirmBtn) {
+                        pick_view.confirmBtn = new ToolBarButton({
                             transition: "none",
                             id: view.id + "confirmBtn",
                             label: "Выбрать",
                             parentBtn: btn,
                             onClick: function () {
-                                this.parentBtn.selected_units = [];
-                                view.string_units = "";
+                                var selected_units = [], string_units;
                                 var d = 0;
                                 for (var j = 0; j < pick_view.listUnitButtons.length; j++) {
                                     var dataItem = data[j];
                                     if (pick_view.listUnitButtons[j].get("checked") == true) {
-                                        view.string_units += "" + dataItem.short_name + " | ";
-                                        this.parentBtn.selected_units[d] = dataItem;
+                                        string_units = (!string_units) ? dataItem.short_name : string_units+" | "+dataItem.short_name;
+                                        selected_units[d] = dataItem;
                                         d++;
                                     }
                                 }
-                                if (this.parentBtn.selected_units.length >0) {
-                                    view.confirmBtn.set("moveTo", view.id);
-                                    view.string_units = view.string_units.slice(0, view.string_units.length - 3);
-                                    this.parentBtn.set("label", view.string_units)
-                                }
+                                if (selected_units.length >0) {
+                                    this.parentBtn.selected_units = selected_units;
+                                    this.parentBtn.set("label", string_units);
+                                    pick_view.confirmBtn.set("moveTo", view.id);
+                                } else
+                                    pick_view.confirmBtn.set("moveTo", null);
+                                console.log("this.parentBtn.selected_units=",this.parentBtn.selected_units,"UNITS_data=", this.parentBtn.units_data);
                             }
                         });
-                        pick_view.addChild(view.accept_heading);
-                        view.accept_heading.addChild(view.confirmBtn, 2);
-                        view.accept_heading.startup();
-                        view.startup();
+                        pick_view.addChild(pick_view.accept_heading);
+                        pick_view.accept_heading.addChild(pick_view.confirmBtn, 2);
+                        pick_view.accept_heading.startup();
+                        pick_view.startup();
                     }
                 };
                 var setPickBtnFor = function (view) {
