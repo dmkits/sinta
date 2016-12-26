@@ -40,7 +40,8 @@
             font-size: 1.5em;
             font-weight: lighter;
         }
-        #view_main_detail_btn{
+
+        #view_main_detail_btn {
             display: inline-block;
             position: relative;
             cursor: pointer;
@@ -74,13 +75,14 @@
 <body id="body" class="claro" style="width:100%; height: 100%">
 </body>
 <script>
-    require(["dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
+    require(["dojo/_base/window",
+                "dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
                 "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
                 "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
-                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator"],
+                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button"],
 
-            function (xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
-                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator) {
+            function (win, domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
+                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button) {
                 moment.locale("uk");
                 numeral.language('ru-UA');
 
@@ -108,6 +110,28 @@
                     icon: "/icons/hearts29x29.ico",
                     iconPos: "0,0,29,29"
                 });
+                if (!view_main.dialogWin) {
+                    view_main.dialogWin = new SimpleDialog({
+                        id: "dialogWin"
+                    });
+                    win.body().appendChild(view_main.dialogWin.domNode);
+                }
+                if (!view_main.msgBox) {
+                    view_main.msgBox = domConstruct.create("div",
+                            {class: "mblSimpleDialogText"},
+                            view_main.dialogWin.domNode);
+                }
+                if (!view_main.cancelBtn)
+                    view_main.cancelBtn = new Button({
+                        class: "mblSimpleDialogButton mblRedButton",
+                        innerHTML: "Ok"
+                    });
+                view_main.cancelBtn.connect(view_main.cancelBtn.domNode, "click",
+                        function (e) {
+                            view_main.dialogWin.hide()
+                        });
+                view_main.cancelBtn.placeAt(view_main.dialogWin.domNode);
+
                 pickUnitBtnHeading.addChild(icon_btn);
                 view_main.addChild(pickUnitBtnHeading);
                 view_main.addChild(main_sv);
@@ -115,7 +139,7 @@
                 view_main.pickUnitBtn = new ToolBarButton({
                     style: "width:" + v + "px; font-size:14px; align: center",
                     transition: "none",
-                    moveTo: "view_main_pick_unit",
+                    moveTo: "pick_unit_view",
                     onClick: function () {
                         showPickUnitView(this, view_main)
                     }
@@ -164,16 +188,14 @@
                         view.btnEndDate_dateValue = view_main.btnEndDate_dateValue;
                     }
 
-                    if(!view_main.detailBtn) {
+                    if (!view_main.detailBtn) {
                         view_main.detailBtn = new ToggleButton({
                             label: "Детально",
-                            id:view_main.id+"_detail_btn",
-                           // style: "font-size:14px; font-weight:bold",
+                            id: view_main.id + "_detail_btn",
                             onClick: function () {
                                 view_main.loadDetailContent()
                             }
                         });
-                       // view_main.detailBtn.setAttribute("class","detailBtn");
                         view_main.dateBtnHeading.addChild(view_main.detailBtn);
                     }
                 };
@@ -185,13 +207,13 @@
                         bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");
                         bottomHeading.startup();
                     }
-                    if(!tr){
+                    if (!tr) {
                         var table = document.createElement('table');
-                        table.setAttribute("align","center");
-                        var tbody=document.createElement('tbody');
-                        var tr=document.createElement('tr');
-                        var td=document.createElement('td');
-                        td.setAttribute("aling","center");
+                        table.setAttribute("align", "center");
+                        var tbody = document.createElement('tbody');
+                        var tr = document.createElement('tr');
+                        var td = document.createElement('td');
+                        td.setAttribute("aling", "center");
                         bottomHeading.domNode.appendChild(table);
                         table.appendChild(tbody);
                         tbody.appendChild(tr);
@@ -199,7 +221,7 @@
                     }
                     if (!view.todayBtn) {
                         var bottom_btn1 = new ToolBarButton({
-                            style:"padding-left:4px;padding-right:4px; ",
+                            style: "padding-left:4px;padding-right:4px; ",
                             label: "Сегодня",
                             clickable: "true"
                         });
@@ -213,13 +235,12 @@
                             view.loadDetailContent();
                         };
                         view.todayBtn = bottom_btn1;
-                      //  bottomHeading.addChild(view.todayBtn);
                         tr.appendChild(view.todayBtn.domNode);
                         view.todayBtn.startup();
                     }
                     if (!view.yesterdayBtn) {
                         var bottom_btn2 = new ToolBarButton({
-                            style:"padding-left:4px;padding-right:4px; ",
+                            style: "padding-left:4px;padding-right:4px; ",
                             label: "Вчера",
                             clickable: "true"
                         });
@@ -233,13 +254,12 @@
                             view.loadDetailContent();
                         };
                         view.yesterdayBtn = bottom_btn2;
-                       // bottomHeading.addChild(view.yesterdayBtn);
                         tr.appendChild(view.yesterdayBtn.domNode);
                         view.yesterdayBtn.startup();
                     }
                     if (!view.weekBtn) {
                         var bottom_btn3 = new ToolBarButton({
-                            style:"padding-left:4px;padding-right:4px; ",
+                            style: "padding-left:4px;padding-right:4px; ",
                             label: "Неделя", clickable: "true"
                         });
                         bottom_btn3.onClick = function () {
@@ -252,13 +272,12 @@
                             view.loadDetailContent();
                         };
                         view.weekBtn = bottom_btn3;
-                        //bottomHeading.addChild(view.weekBtn);
                         tr.appendChild(view.weekBtn.domNode);
                         view.weekBtn.startup();
                     }
                     if (!view.monthBtn) {
                         var bottom_btn4 = new ToolBarButton({
-                            style:"padding-left:4px;padding-right:4px; ",
+                            style: "padding-left:4px;padding-right:4px; ",
                             label: "Месяц",
                             clickable: "true"
                         });
@@ -272,7 +291,6 @@
                             view.loadDetailContent();
                         };
                         view.monthBtn = bottom_btn4;
-                       // bottomHeading.addChild(view.monthBtn);
                         tr.appendChild(view.monthBtn.domNode);
                         view.monthBtn.startup();
                     } else {
@@ -288,7 +306,7 @@
                  }*/
                 view_main.loadMainContent = function () {
                     getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true}
-                            , function (success, result) {                      console.log("view_main.loadMainContent getJSONData ", result);
+                            , function (success, result) {                                                              console.log("view_main.loadMainContent getJSONData ", result);
                                 if (success) {
                                     view_main.setMainContent(result);
                                 } else {//error!!!
@@ -313,6 +331,18 @@
                     view_main.setBottomButtonsFor(view_main);
                     view_main.inner_scroll.startup();
                     view_main.startup();
+                    if (maindata.mode.indexOf("test") !== -1) {
+                        var test_btn = new ToolBarButton({
+                            icon: "/icons/exclamation-mark29x29.ico",
+                            iconPos: "0,0,29,29",
+                            style: "float:right",
+                            onClick: function () {
+                                view_main.msgBox.innerHTML = maindata.mode;
+                                view_main.dialogWin.show();
+                            }
+                        });
+                        view_main.top_heading_main.addChild(test_btn);
+                    }
                     if (!view_main.btnBeginDate.label) view_main.todayBtn.onClick();
                     //   view_main.btnBeginDate_dateValue, view_main.btnEndDate_dateValue
                     //          20161001    201610131
@@ -331,26 +361,27 @@
                     view_main.prog.start();
                     var bdate = view_main.btnBeginDate_dateValue.format("YYYYMMDD");
                     var edate = view_main.btnEndDate_dateValue.format("YYYYMMDD");
-                    var unit_params = null;
-                    var detail= (view_main.detailBtn.get("checked"))? "&detail":"";  console.log("detail=",detail);
-                    unit_params = (unit_params === null) ? "" : "&" + unit_params;
+                    var detail = (view_main.detailBtn.get("checked")) ? "&detail" : "";
                     var units_list = view_main.pickUnitBtn.selected_units;
+                    var unit_params = null;
                     for (var i in units_list) {
-                        unit_params = "unit_id_" + i + "=" + units_list[i].id;
-                        unit_params = (unit_params === null) ? "" : "&" + unit_params;
-                    }
+                        var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
+                        unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
+                    }                                                                                           console.log("unit_params=",unit_params);
                     getJSONData({
                                 url: "/mobile",
-                                condition: "action=get_main_data&bdate=" + bdate + "&edate=" + edate + unit_params+detail,//get_cashbalance
+                                condition: "action=get_main_data&bdate=" + bdate + "&edate=" + edate + "&"+unit_params + detail,//get_cashbalance
                                 consoleLog: true
                             }
                             , function (success, result) {
-                                if (success) {                              console.log("view_main.loadDetailContent getJSONData result=", result);
+                                if (success) {                                                                          console.log("view_main.loadDetailContent getJSONData result=", result);
                                     if (result.error) {
-                                        alert("Нет данных");            console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                        view_main.msgBox.innerHTML = "Нет данных";                                      console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                        view_main.dialogWin.show();
                                     } else view_main.setDetailContent(result);
                                 } else {//error!!!
-                                    alert("Нет данных");
+                                    view_main.msgBox.innerHTML = "Нет связи с сервером";
+                                    view_main.dialogWin.show();
                                 }
                                 view_main.prog.stop();
                             }
@@ -373,7 +404,7 @@
                             label: dataItem.label,
                             rightText: string_value,
                             moveTo: "view_" + dataItem.id,
-                            transition:"none"
+                            transition: "none"
                         });
                         if (dataItem.icon) {
                             list_item.set("icon", dataItem.icon);
@@ -385,7 +416,7 @@
                         if (!dataItem.style) {
                             list_item.set("style", "background-color:white")
                         }
-                        if(dataItem.url){
+                        if (dataItem.url) {
                             list_item.url = dataItem.url;
                         }
                         if (dataItem.action) {
@@ -419,12 +450,15 @@
                         var hf = document.createElement('div');
                         hf.setAttribute("id", id + "hf");
                         div_sv.appendChild(hf);
+
                         view = new View({id: id}, id);
+                        //document.getElementById("body").appendChild(view_div);
+
                         var top_heading = new Heading({
                             label: heading_label,
                             back: "Назад",
                             moveTo: "view_main",
-                            transition:"none",
+                            transition: "none",
                             onClick: function () {
                                 view_main.loadDetailContent()
                             }
@@ -439,7 +473,7 @@
                         view.inner_scroll.startup();
                         view.startup();
 
-                        view.loadDetailContent = function () {
+                        view.loadDetailContent = function () {          console.log("loadDetailContent");
                             if (view.list_items) {
                                 view.list_items.destroy();
                             }
@@ -452,25 +486,27 @@
                             view.prog.start();
                             var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
                             var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
+                            var units_list = view.pickUnitBtn.selected_units;
                             var unit_params = null;
-                            var units_list = view_main.pickUnitBtn.selected_units;
                             for (var i in units_list) {
-                                unit_params = "unit" + i + "=id:" + units_list[i].id;
-                                unit_params = (unit_params === null) ? "" : "&" + unit_params;
-                            }
+                                var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
+                                unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
+                            }                                                                                           console.log("unit_params=",unit_params);
                             getJSONData({
                                         //  url: "mobile/cashin_sum.json"
                                         url: view.url,
-                                        condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + unit_params,
+                                        condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + "&"+unit_params,
                                         consoleLog: true
                                     }
                                     , function (success, result) {
                                         if (success) {
                                             if (result.error) {
-                                                alert("Нет данных");         console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                                view_main.msgBox.innerHTML = "Нет данных";                              console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                                view_main.dialogWin.show();
                                             } else view.setDetailContent(result.items);
                                         } else {
-                                            alert("Нет связи с сервером");
+                                            view_main.msgBox.innerHTML = "Нет связи с сервером";
+                                            view_main.dialogWin.show();
                                         }
                                         view.prog.stop();
                                     }
@@ -486,11 +522,11 @@
                         this.inner_scroll.addChild(view.list_items);
                         /*
                          [
-                         {"date":"21.11.2016 12:25","sum":"125"},
-                         {"date":"21.11.2016 12:30","sum":"340"},
-                         {"date":"21.11.2016 12:38","sum":"600"},
-                         {"date":"21.11.2016 12:42","sum":"-340"},
-                         {"date":"21.11.2016 12:50","sum":"1500"}
+                         {"label":"","value":"125"},
+                         {"label":"","value":"340"},
+                         {"label":"","value":"600"},
+                         {"label":"","value":"-340"},
+                         {"label":"","value":"1500"}
                          ]
                          */
                         for (var i in data) {
@@ -566,20 +602,20 @@
                         view.loadDetailContent();
                     }
                 };
-                var showPickUnitView = function (btn, view) {     console.log("btn.units_data=",btn.selected_units, "btn.selected_units=",btn.selected_units);
-                    var pick_view = registry.byId(view.id + "_pick_unit");
+                var showPickUnitView = function (btn, view) {                                                           console.log("btn.units_data=", btn.selected_units, "btn.selected_units=", btn.selected_units);
+                    var pick_view = registry.byId("pick_unit_view");
                     if (!pick_view) {
-                        pick_view = new View({id: view.id + "_pick_unit"});
-                        var top_heading = new Heading({
+                        pick_view = new View({id: "pick_unit_view"});
+                        pick_view.top_heading = new Heading({
                             transition: "none",
                             label: "Выберите филиал",
-                            back: "Назад",
-                            moveTo: view.id
+                            back: "Назад"
                         });
                         document.getElementById("body").appendChild(pick_view.domNode);
-                        top_heading.startup();
-                        pick_view.addChild(top_heading, 0);
+                        pick_view.top_heading.startup();
+                        pick_view.addChild(pick_view.top_heading, 0);
                     }
+                    pick_view.top_heading.set("moveTo", view.id);
                     pick_view.listUnitButtons = [];
                     var data;
 
@@ -610,7 +646,6 @@
                         pick_view.listUnitButtons[i] = tooggleBtn;
                         item.addChild(tooggleBtn, 0);
                     }
-
                     if (!pick_view.accept_heading) {
                         pick_view.accept_heading = new Heading({id: view.id + "accept_heading"});
                     }
@@ -618,33 +653,33 @@
                         pick_view.confirmBtn = new ToolBarButton({
                             transition: "none",
                             id: view.id + "confirmBtn",
-                            label: "Выбрать",
-                            parentBtn: btn,
-                            onClick: function () {
-                                var selected_units = [], string_units;
-                                var d = 0;
-                                for (var j = 0; j < pick_view.listUnitButtons.length; j++) {
-                                    var dataItem = data[j];
-                                    if (pick_view.listUnitButtons[j].get("checked") == true) {
-                                        string_units = (!string_units) ? dataItem.short_name : string_units+" | "+dataItem.short_name;
-                                        selected_units[d] = dataItem;
-                                        d++;
-                                    }
-                                }
-                                if (selected_units.length >0) {
-                                    this.parentBtn.selected_units = selected_units;
-                                    this.parentBtn.set("label", string_units);
-                                    pick_view.confirmBtn.set("moveTo", view.id);
-                                } else
-                                    pick_view.confirmBtn.set("moveTo", null);
-                                console.log("this.parentBtn.selected_units=",this.parentBtn.selected_units,"UNITS_data=", this.parentBtn.units_data);
-                            }
+                            label: "Выбрать"
                         });
                         pick_view.addChild(pick_view.accept_heading);
                         pick_view.accept_heading.addChild(pick_view.confirmBtn, 2);
                         pick_view.accept_heading.startup();
                         pick_view.startup();
                     }
+                    pick_view.confirmBtn.parentBtn = btn;
+                    pick_view.confirmBtn.onClick = function () {
+                        var selected_units = [], string_units;
+                        var d = 0;
+                        for (var j = 0; j < pick_view.listUnitButtons.length; j++) {
+                            var dataItem = data[j];
+                            if (pick_view.listUnitButtons[j].get("checked") == true) {
+                                string_units = (!string_units) ? dataItem.short_name : string_units + " | " + dataItem.short_name;
+                                selected_units[d] = dataItem;
+                                d++;
+                            }
+                        }
+                        if (selected_units.length > 0) {
+                            this.parentBtn.selected_units = selected_units;
+                            this.parentBtn.set("label", string_units);
+                            pick_view.confirmBtn.set("moveTo", view.id);
+                            view.loadDetailContent();
+                        } else
+                            pick_view.confirmBtn.set("moveTo", null);                                                   console.log("this.parentBtn.selected_units=", this.parentBtn.selected_units, "UNITS_data=", this.parentBtn.units_data);
+                    };
                 };
                 var setPickBtnFor = function (view) {
                     if (!view.pickUnitBtnHeading) {
@@ -663,14 +698,14 @@
                         view.pickUnitBtn = new ToolBarButton({
                             style: "width:" + v + "px; font-size:14px; align: center",
                             transition: "none",
-                            moveTo: view.id + "_pick_unit",
+                            moveTo: "pick_unit_view",
                             onClick: function () {
                                 showPickUnitView(this, view);
                             }
                         });
                     view.pickUnitBtn.units_data = view_main.pickUnitBtn.units_data;
                     view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
-                    view.pickUnitBtn.set("label", view_main.string_units);
+                    view.pickUnitBtn.set("label", view_main.pickUnitBtn.label);
                     view.pickUnitBtnHeading.addChild(view.pickUnitBtn);
                     window.onresize = function () {
                         v = window.innerWidth - 90;
