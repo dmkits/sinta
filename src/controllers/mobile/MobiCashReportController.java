@@ -64,6 +64,7 @@ public class MobiCashReportController extends PageController {
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("SALE_SUM", "value")
                         .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("STOCK_ID", "unit_id")
                         .replaceResultItemName("ID", "id")
                                 //.addToResultItem("url", "/mobile")
                         .addResultToList(outData, "items");
@@ -239,7 +240,7 @@ public class MobiCashReportController extends PageController {
                     "FROM t_SalePays pays " +
                     "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
                     "WHERE pays.PayformCode=1 " +
-                    "AND sales.DocDate BETWEEN  ?  AND ?")
+                    "AND sales.DocDate BETWEEN  ?  AND ?  AND sales.StockID "+ sUnitsCondition)
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
                     .replaceResultItemName("CASH_SALE_SUM", "value")
@@ -250,21 +251,27 @@ public class MobiCashReportController extends PageController {
                     "FROM t_CRRetPays pays " +
                     "  INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
                     "WHERE pays.PayformCode=1 " +
-                    "      AND returns.DocDate BETWEEN  ?  AND ?")
+                    "      AND returns.DocDate BETWEEN  ?  AND ?  AND returns.StockID "+ sUnitsCondition)
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
                     .replaceResultItemName("CASH_RETURN_SUM", "value")
                     .addToResultItem("label", "Возвраты нал")
-                    .addResultItemToList(outData, "items");
+                    .addResultItemToList(outData, "items"); //t_monIntRec
 
-            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_IN_SUM FROM t_monIntRec WHERE DocDate BETWEEN  ?  AND ?")
+            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_IN_SUM " +
+                    "FROM t_monIntRec r\n" +
+                    " INNER JOIN r_Crs cr ON cr.CRID = r.CRID\n" +
+                    "WHERE r.DocDate BETWEEN ? AND ? AND cr.StockID "+ sUnitsCondition)
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
                     .replaceResultItemName("CASH_IN_SUM", "value")
                     .addToResultItem("label", "Вносы нал")
                     .addResultItemToList(outData, "items");
 
-            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_OUT_SUM FROM t_monIntExp WHERE DocDate BETWEEN  ?  AND ?")
+            DMSimpleQuery.instance("SELECT sum(SumCC)AS CASH_OUT_SUM " +
+                    "FROM t_monIntExp e\n" +
+                    " INNER JOIN r_Crs cr ON cr.CRID = e.CRID\n" +
+                    "WHERE e.DocDate BETWEEN ? AND ? AND cr.StockID "+ sUnitsCondition)
                     .setParameter(sBDate).setParameter(sEDate)
                     .select(getSessionDBUS(session))
                     .replaceResultItemName("CASH_OUT_SUM", "value")
@@ -280,7 +287,7 @@ public class MobiCashReportController extends PageController {
                     "INNER JOIN t_Sale s ON s.ChID=sd.ChID\n" +
                     "INNER JOIN r_Prods p ON p.ProdID=sd.ProdID\n" +
                     "INNER JOIN r_ProdC pc on pc.PCatID=p.PCatID\n" +
-                    "WHERE s.DocDate BETWEEN ? AND ? " +
+                    "WHERE s.DocDate BETWEEN ? AND ?  AND s.StockID "+ sUnitsCondition +
                     "GROUP BY pc.PCatName\n" +
                     "ORDER BY sum DESC")
                     .setParameter(sBDate).setParameter(sEDate)
@@ -298,7 +305,7 @@ public class MobiCashReportController extends PageController {
                     "INNER JOIN t_CRRet r ON r.ChID=rd.ChID\n" +
                     "INNER JOIN r_Prods p ON p.ProdID=rd.ProdID\n" +
                     "INNER JOIN r_ProdC pc on pc.PCatID=p.PCatID\n" +
-                    "WHERE r.DocDate BETWEEN ? AND ? r.StockID "+ sUnitsCondition +
+                    "WHERE r.DocDate BETWEEN ? AND ? AND r.StockID "+ sUnitsCondition +
                     "GROUP BY pc.PCatName\n" +
                     "ORDER BY sum DESC")
                     .setParameter(sBDate).setParameter(sEDate)
