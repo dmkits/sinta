@@ -340,7 +340,8 @@
                 view_main.loadDetailContent = function () {
                     var view_main_list_items = registry.byId("view_main_list_items");
                     if (view_main_list_items) {
-                        view_main_list_items.destroy()
+                       view_main_list_items.destroy();
+
                     }
                     if (view_main.prog) {
                         view_main.prog.destroy()
@@ -383,7 +384,7 @@
                     });
                     view_main.inner_scroll.addChild(view_main_list_items);
                     view_main_list_items.startup();
-                    var data = balance_data.items;
+                    var data = balance_data.items;                                                       console.log("data=", data);
                     for (var i in data) {
                         var dataItem = data[i], listItemIdPrefix = "mainListItem_";
                         var list_item = registry.byId(listItemIdPrefix + dataItem.id);
@@ -391,7 +392,7 @@
                         list_item = new ListItem({
                             id: listItemIdPrefix + dataItem.id,
                             label: dataItem.label,
-                            //data_unit_id: dataItem.unit_id,
+                            data_unit_id: dataItem.unit_id,
                             rightText: string_value,
                             moveTo: "view_" + dataItem.id,
                             transition: "none"
@@ -412,20 +413,29 @@
                         if (dataItem.action) {
                             list_item.actionValue = dataItem.action;
                             list_item.onClick = function () {
-                                var view = view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue);
+                                var view = view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue, this.data_unit_id);
                             }
                         }
-                        if (!dataItem.action) {
-                            list_item.set({
-                                preventTouch: true,
-                                noArrow: true
-                            });
-                        }
+//                        if(list_item.data_unit_id){
+//                            list_item.onClick = function () {
+//                                var view = view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue );
+//                            }
+//                        }
+
+//                        if(dataItem.unit_id){
+//                            list_item.set({data_unit_id : dataItem.unit_id})
+//                        }
+//                        if (list_item.actionValue==undefined && list_item.data_unit_id==undefined) {
+//                            list_item.set({
+//                                preventTouch: true,
+//                                noArrow: true
+//                            });
+                    //    }
                         view_main_list_items.addChild(list_item);
                         list_item.startup();
                     }
                 };
-                view_main.showDetailView = function (heading_label, id, url, actionValue) {
+                view_main.showDetailView = function (heading_label, id, url, actionValue, unit_id) {
                     var view = registry.byId(id);
                     if (!view) {
                         view = new View({id: id});
@@ -454,6 +464,7 @@
                         view.loadDetailContent = function () {          console.log("loadDetailContent");
                             if (view.list_items) {
                                 view.list_items.destroy();
+
                             }
                             if (view.prog) {
                                 view.prog.destroy()
@@ -463,12 +474,16 @@
                             view.prog.start();
                             var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
                             var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
-                            var units_list = view.pickUnitBtn.selected_units;
+
                             var unit_params = null;
-                            for (var i in units_list) {
-                                var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
-                                unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
-                            }                                                                                           console.log("unit_params=",unit_params);
+                            if (unit_id===undefined){
+                                var units_list = view.pickUnitBtn.selected_units;
+                                for (var i in units_list) {
+                                    var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
+                                    unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
+                                }                                                                                           console.log("unit_params=",unit_params);
+                            } else
+                                unit_params = "unit_id=" + unit_id;
                             getJSONData({
                                         //  url: "mobile/cashin_sum.json"
                                         url: view.url,
