@@ -337,7 +337,7 @@
                     //          20161001    201610131
                     //  var cashbalance = loadMobileDataFromServer("/mobile?action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params);
                 };
-                view_main.loadDetailContent = function () {
+                view_main.loadDetailContent = function () {                                                             console.log(" view_main.loadDetailContent START");
                     var view_main_list_items = registry.byId("view_main_list_items");
                     if (view_main_list_items) {
                        view_main_list_items.destroy();
@@ -435,77 +435,85 @@
                         list_item.startup();
                     }
                 };
+                view_main.onBeforeTransitionIn = function(){                                                 console.log("view_main.onBeforeTransitionIn");
+                    view_main.loadDetailContent();
+                };
                 view_main.showDetailView = function (heading_label, id, url, actionValue, unit_id) {
                     var view = registry.byId(id);
                     if (!view) {
                         view = new View({id: id});
                         document.getElementById('body').appendChild(view.domNode);
 
-                        var top_heading = new Heading({
+                        view.top_heading = new Heading({
                             label: heading_label,
                             back: "Назад",
                             moveTo: "view_main",
-                            transition: "none",
-                            onClick: function () {
-                                view_main.loadDetailContent()
-                            }
+                            transition: "none"
                         });
+
                         view.inner_scroll = new ScrollableView({});
                         document.getElementById('body').appendChild(view.inner_scroll.domNode);
                         view.url = url;
-                        view.addChild(top_heading, 0);
-                        setPickBtnFor(view,unit_id);
+                        view.addChild(view.top_heading, 0);
+                        setPickBtnFor(view, unit_id);
                         view.addChild(view.inner_scroll);
                         view_main.setTopButtonsFor(view);
                         view_main.setBottomButtonsFor(view);
                         view.inner_scroll.startup();
                         view.startup();
 
-                        view.loadDetailContent = function () {             console.log("loadDetailContent");
-                            if (view.list_items) {
-                                view.list_items.destroy();
-                            }
-                            if (view.prog) {
-                                view.prog.destroy()
-                            }
-                            view.prog = new ProgressIndicator({size: 200, center: true, removeOnStop: true});
-                            document.getElementById('body').appendChild(view.prog.domNode);
-                            view.prog.start();
-                            var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
-                            var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
+                        view.loadDetailContent = function (unit_id) {                                                   console.log("loadDetailContent");
 
-                            var unit_params = null;
-                            if (unit_id===undefined){
-                                var units_list = view.pickUnitBtn.selected_units;
-                                for (var i in units_list) {
-                                    var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
-                                    unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
-                                }                                                                                                   console.log("unit_params=",unit_params);
-                            } else
-                                unit_params = "unit_id=" + unit_id;
-                            getJSONData({
-                                        //  url: "mobile/cashin_sum.json"
-                                        url: view.url,
-                                        condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + "&"+unit_params,
-                                        consoleLog: true
-                                    }
-                                    , function (success, result) {
-                                        if (success) {
-                                            if (result.error) {
-                                                view_main.msgBox.innerHTML = "Нет данных";                              console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
-                                                view_main.dialogWin.show();
-                                            } else view.setDetailContent(result.items);
-                                        } else {
-                                            view_main.msgBox.innerHTML = "Нет связи с сервером";
+                            if (view.list_items) {
+                            view.list_items.destroy();
+                        }
+                        if (view.prog) {
+                            view.prog.destroy()
+                        }
+                        view.prog = new ProgressIndicator({size: 200, center: true, removeOnStop: true});
+                        document.getElementById('body').appendChild(view.prog.domNode);
+                        view.prog.start();
+                        var bdate = view.btnBeginDate_dateValue.format("YYYYMMDD");
+                        var edate = view.btnEndDate_dateValue.format("YYYYMMDD");
+
+                        var unit_params = null;                                                                         console.log("view.loadDetailContent unit_id=", unit_id);
+                        if (unit_id == undefined) {
+                            var units_list = view.pickUnitBtn.selected_units;
+                            for (var i in units_list) {
+                                var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
+                                unit_params = (unit_params === null) ? unit_condition : unit_params + "&" + unit_condition;
+                            }
+                            console.log("unit_params=", unit_params);
+                        } else
+                            unit_params = "unit_id=" + unit_id;
+
+                        getJSONData({
+                                    //  url: "mobile/cashin_sum.json"
+                                    url: view.url,
+                                    condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + "&" + unit_params,
+                                    consoleLog: true
+                                }
+                                , function (success, result) {
+                                    if (success) {
+                                        if (result.error) {
+                                            view_main.msgBox.innerHTML = "Нет данных";
+                                            console.log("view.loadDetailContent getJSONData DATA ERROR! error=", result.error);
                                             view_main.dialogWin.show();
-                                        }
-                                        view.prog.stop();
+                                        } else view.setDetailContent(result.items);
+                                    } else {
+                                        view_main.msgBox.innerHTML = "Нет связи с сервером";
+                                        view_main.dialogWin.show();
                                     }
-                            );
+                                    view.prog.stop();
+                                }
+                        );
                         }
 
-                    } else {
-                        setPickBtnFor(view,unit_id);
+                    }else{
+                        view.top_heading.set({onClick: function () {
+                            view_main.loadDetailContent();
+                        }});
+                        setPickBtnFor(view, unit_id);
                         view_main.setTopButtonsFor(view);
                     }
                     view.setDetailContent = function (data) {
@@ -532,7 +540,7 @@
                         }
                         view.list_items.startup();
                     };
-                    view.loadDetailContent();
+                    view.loadDetailContent(unit_id);
                     return view;
                 };
                 var showCalendarView = function (btn, heading, view) {
@@ -702,11 +710,13 @@
                        view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
                        view.pickUnitBtn.set("label", view_main.pickUnitBtn.label);
                    }else{
+                       view.pickUnitBtn.selected_units= [];
                        for(var u in view_main.pickUnitBtn.units_data){
                            var unit_data=view_main.pickUnitBtn.units_data[u];
                            if(unit_id==unit_data.id){
                                view.pickUnitBtn.selected_units[0]=unit_data;
                                view.pickUnitBtn.set("label", unit_data.short_name);
+                               break;
                            }
                        }
                    }
