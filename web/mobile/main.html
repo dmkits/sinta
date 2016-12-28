@@ -75,21 +75,20 @@
 <body id="body" class="claro" style="width:100%; height: 100%">
 </body>
 <script>
-    require(["dojo/_base/window",
-                "dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
+    require(["dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
                 "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
                 "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
                 "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button"],
 
-            function (win, domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
+            function ( domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
                       Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button) {
                 moment.locale("uk");
                 numeral.language('ru-UA');
 
                 var view_main = new View({id: "view_main"});
-                win.body().appendChild(view_main.domNode);
+                document.getElementById('body').appendChild(view_main.domNode);
                 view_main.inner_scroll = new ScrollableView({});
-                win.body().appendChild(view_main.inner_scroll.domNode);
+                document.getElementById('body').appendChild(view_main.inner_scroll.domNode);
                 view_main.top_heading_main = new Heading({id:"th_main"});
                 view_main.addChild(view_main.top_heading_main, 0);
                 var pickUnitBtnHeading = new Heading({id:"pubtn_h"});
@@ -103,7 +102,7 @@
                     view_main.dialogWin = new SimpleDialog({
                         id: "dialogWin"
                     });
-                    win.body().appendChild(view_main.dialogWin.domNode);
+                    document.getElementById('body').appendChild(view_main.dialogWin.domNode);
                 }
                 if (!view_main.msgBox) {
                     view_main.msgBox = domConstruct.create("div",
@@ -192,7 +191,8 @@
                     var bottomHeading = registry.byId(view.id + "hf");
                     if (!bottomHeading) {
                         bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");
-                        win.body().appendChild(bottomHeading.domNode);
+                        document.getElementById('body').appendChild(bottomHeading.domNode);
+
                         view.inner_scroll.domNode.appendChild(bottomHeading.domNode);
                         bottomHeading.startup();
                     }
@@ -381,6 +381,7 @@
                         style: "position:relative",
                         "id": "view_main_list_items"
                     });
+                    view_main.inner_scroll.scrollTo({x:0, y:-5});
                     view_main.inner_scroll.addChild(view_main_list_items);
                     view_main_list_items.startup();
                     var data = balance_data.items;                                                       console.log("data=", data);
@@ -438,7 +439,7 @@
                     var view = registry.byId(id);
                     if (!view) {
                         view = new View({id: id});
-                        win.body().appendChild(view.domNode);
+                        document.getElementById('body').appendChild(view.domNode);
 
                         var top_heading = new Heading({
                             label: heading_label,
@@ -450,7 +451,7 @@
                             }
                         });
                         view.inner_scroll = new ScrollableView({});
-                        win.body().appendChild(view.inner_scroll.domNode);
+                        document.getElementById('body').appendChild(view.inner_scroll.domNode);
                         view.url = url;
                         view.addChild(top_heading, 0);
                         setPickBtnFor(view,unit_id);
@@ -510,6 +511,7 @@
                     view.setDetailContent = function (data) {
                         view.list_items = new roundRectList({"id": "list" + this.id});
                         this.inner_scroll.addChild(view.list_items);
+                        view.inner_scroll.scrollTo({x:0, y:-5});
                         /*
                          [
                          {"label":"","value":"125"},

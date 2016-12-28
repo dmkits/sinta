@@ -89,7 +89,7 @@ public class MobiCashReportController extends PageController {
                         .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT 'cash_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName," +
+                DMSimpleQuery.instance("SELECT 'cash_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName, st.StockID AS STOCK_ID," +
                         "REPLACE(st.StockName,'Магазин IN UA ','Выручка НАЛ ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM\n" +
                         "FROM r_Stocks st\n" +
                         "  LEFT JOIN (\n" +
@@ -111,10 +111,13 @@ public class MobiCashReportController extends PageController {
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("SUMM", "value")
                         .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("STOCK_ID", "unit_id")
                         .replaceResultItemName("ID", "id")
+                        .addToAllResultItems("action", "cash_detail_view")
+                        .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT 'card_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName," +
+                DMSimpleQuery.instance("SELECT 'card_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName,  st.StockID AS STOCK_ID," +
                         "REPLACE(st.StockName,'Магазин IN UA ','Выручка ПК ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM\n" +
                         "FROM r_Stocks st\n" +
                         "  LEFT JOIN (\n" +
@@ -136,10 +139,13 @@ public class MobiCashReportController extends PageController {
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("SUMM", "value")
                         .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("STOCK_ID", "unit_id")
                         .replaceResultItemName("ID", "id")
+                        .addToAllResultItems("action", "cash_detail_view")
+                        .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT 'else_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName," +
+                DMSimpleQuery.instance("SELECT 'else_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName,  st.StockID AS STOCK_ID," +
                         "REPLACE(st.StockName,'Магазин IN UA ','Выручка прочее ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM\n" +
                         "FROM r_Stocks st\n" +
                         "  LEFT JOIN (\n" +
@@ -161,7 +167,10 @@ public class MobiCashReportController extends PageController {
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("SUMM", "value")
                         .replaceResultItemName("SHORT_NAME", "label")
+                        .replaceResultItemName("STOCK_ID", "unit_id")
                         .replaceResultItemName("ID", "id")
+                        .addToAllResultItems("action", "other_detail_view")
+                        .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
             } else {
                 DMSimpleQuery.instance("select COALESCE(SUM(TSumCC_wt),0) as SALE_SUM from t_Sale where DocDate BETWEEN ?  AND ? AND StockID " + sUnitsCondition)
@@ -235,6 +244,7 @@ public class MobiCashReportController extends PageController {
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("OTHER_INCOME", "value")
                         .addToResultItem("label", "Выручка прочее")
+                        .addToResultItem("action", "other_detail_view")
                         .addToResultItem("id", "other_income")
                         .addToResultItem("url", "/mobile")
                         .addResultItemToList(outData, "items");
@@ -348,6 +358,32 @@ public class MobiCashReportController extends PageController {
                     .select(getSessionDBUS(session))
                     .replaceResultItemName("CARD_RETURN_SUM", "value")
                     .addToResultItem("label", "Возвраты ПК")
+                    .addResultItemToList(outData, "items");
+        } else if (sAction.equals("other_detail_view")) {
+            HashMap<String, String> params = getReqParams(req);
+            String sBDate = params.get("bdate");
+            String sEDate = params.get("edate");
+            String sUnitsCondition = getUnitsCondition(params);
+            DMSimpleQuery.instance("SELECT SUM(pays.SumCC_wt) AS OTHER_SALE_SUM " +
+                    "FROM t_SalePays pays " +
+                    "  INNER JOIN t_Sales sales ON sales.ChID=pays.ChID " +
+                    "WHERE pays.PayformCode NOT in (1,2) " +
+                    "AND sales.DocDate BETWEEN  ?  AND ?  AND sales.StockID " + sUnitsCondition)
+                    .setParameter(sBDate).setParameter(sEDate)
+                    .select(getSessionDBUS(session))
+                    .replaceResultItemName("OTHER_SALE_SUM", "value")
+                    .addToResultItem("label", "Продажи прочее")
+                    .addResultItemToList(outData, "items");
+
+            DMSimpleQuery.instance("SELECT sum(pays.SumCC_wt)AS OTHER_RETURN_SUM " +
+                    "FROM t_CRRetPays pays " +
+                    "  INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID " +
+                    "WHERE pays.PayformCode NOT in (1,2) " +
+                    "      AND returns.DocDate BETWEEN  ?  AND ?  AND returns.StockID " + sUnitsCondition)
+                    .setParameter(sBDate).setParameter(sEDate)
+                    .select(getSessionDBUS(session))
+                    .replaceResultItemName("OTHER_RETURN_SUM", "value")
+                    .addToResultItem("label", "Возвраты прочее")
                     .addResultItemToList(outData, "items");
         } else return false;
         return true;
