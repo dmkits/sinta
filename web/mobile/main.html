@@ -307,7 +307,7 @@
                 view_main.setMainContent = function (maindata) {
                     view_main.first_header_string = maindata.head;
                     view_main.top_heading_main.set("label", view_main.first_header_string);
-                    view_main.pickUnitBtn.units_data = maindata.units;
+                    view_main.pickUnitBtn.units_data = maindata.units;                          console.log("maindata.units=", maindata.units);
                     view_main.pickUnitBtn.selected_units = [];
                     view_main.pickUnitBtn.selected_units[0] = view_main.pickUnitBtn.units_data[0];
                     view_main.pickUnitBtn.selected_units[1] = view_main.pickUnitBtn.units_data[1];
@@ -341,7 +341,6 @@
                     var view_main_list_items = registry.byId("view_main_list_items");
                     if (view_main_list_items) {
                        view_main_list_items.destroy();
-
                     }
                     if (view_main.prog) {
                         view_main.prog.destroy()
@@ -454,7 +453,7 @@
                         win.body().appendChild(view.inner_scroll.domNode);
                         view.url = url;
                         view.addChild(top_heading, 0);
-                        setPickBtnFor(view);
+                        setPickBtnFor(view,unit_id);
                         view.addChild(view.inner_scroll);
                         view_main.setTopButtonsFor(view);
                         view_main.setBottomButtonsFor(view);
@@ -505,7 +504,7 @@
                         }
 
                     } else {
-                        setPickBtnFor(view);
+                        setPickBtnFor(view,unit_id);
                         view_main.setTopButtonsFor(view);
                     }
                     view.setDetailContent = function (data) {
@@ -593,7 +592,7 @@
                         view.loadDetailContent();
                     }
                 };
-                var showPickUnitView = function (btn, view) {                                                           console.log("btn.units_data=", btn.selected_units, "btn.selected_units=", btn.selected_units);
+                var showPickUnitView = function (btn, view) {                                                           console.log("btn.units_data=", btn.units_data, "btn.selected_units=", btn.selected_units);
                     var pick_view = registry.byId("pick_unit_view");
                     if (!pick_view) {
                         pick_view = new View({id: "pick_unit_view"});
@@ -624,14 +623,14 @@
                             label: dataItem.short_name,
                             style: "font-size: 1em; width:100px; text-align:left"
                         });
-                        tooggleBtn.unit_id = dataItem.id;
+                        tooggleBtn.unit_id = dataItem.id;                                                               console.log("tooggleBtn.unit_id=",tooggleBtn.unit_id);
                         var item = new ListItem({
                             preventTouch: true,
                             innerHTML: " " + dataItem.name,
                             style: "background-color:white"
-                        });
-                        for (var s in btn.selected_units) {
-                            if (tooggleBtn.unit_id == btn.selected_units[s].id) tooggleBtn.set("checked", true);
+                        });                                                                                              console.log("631  btn.selected_units.length=", btn.selected_units);
+                        for (var s=0; s<btn.selected_units.length; s++) {
+                            if (tooggleBtn.unit_id == btn.selected_units[s].id) tooggleBtn.set("checked", true);         console.log("tooggleBtn.unit_id s=",tooggleBtn.unit_id,"btn.selected_units[s].id=", btn.selected_units[s].id  );
                         }
                         pick_view.list_of_units.addChild(item);
                         pick_view.listUnitButtons[i] = tooggleBtn;
@@ -672,7 +671,7 @@
                             pick_view.confirmBtn.set("moveTo", null);                                                   console.log("this.parentBtn.selected_units=", this.parentBtn.selected_units, "UNITS_data=", this.parentBtn.units_data);
                     };
                 };
-                var setPickBtnFor = function (view) {
+                var setPickBtnFor = function (view,unit_id ) {
                     if (!view.pickUnitBtnHeading) {
                         view.pickUnitBtnHeading = new Heading();
                         var icon_btn = new ToolBarButton({
@@ -685,7 +684,7 @@
                         view.addChild(view.pickUnitBtnHeading);
                         view.pickUnitBtnHeading.startup();
                     }
-                    if (!view.pickUnitBtn)
+                    if (!view.pickUnitBtn) {
                         view.pickUnitBtn = new ToolBarButton({
                             style: "width:" + v + "px; font-size:14px; align: center",
                             transition: "none",
@@ -694,9 +693,21 @@
                                 showPickUnitView(this, view);
                             }
                         });
-                    view.pickUnitBtn.units_data = view_main.pickUnitBtn.units_data;
-                    view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
-                    view.pickUnitBtn.set("label", view_main.pickUnitBtn.label);
+                        view.pickUnitBtn.selected_units=[];
+                    }
+                   view.pickUnitBtn.units_data = view_main.pickUnitBtn.units_data;
+                   if(unit_id===undefined) {
+                       view.pickUnitBtn.selected_units = view_main.pickUnitBtn.selected_units;
+                       view.pickUnitBtn.set("label", view_main.pickUnitBtn.label);
+                   }else{
+                       for(var u in view_main.pickUnitBtn.units_data){
+                           var unit_data=view_main.pickUnitBtn.units_data[u];
+                           if(unit_id==unit_data.id){
+                               view.pickUnitBtn.selected_units[0]=unit_data;
+                               view.pickUnitBtn.set("label", unit_data.short_name);
+                           }
+                       }
+                   }
                     view.pickUnitBtnHeading.addChild(view.pickUnitBtn);
                     window.onresize = function () {
                         v = window.innerWidth - 90;
