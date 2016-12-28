@@ -461,10 +461,9 @@
                         view.inner_scroll.startup();
                         view.startup();
 
-                        view.loadDetailContent = function () {          console.log("loadDetailContent");
+                        view.loadDetailContent = function () {             console.log("loadDetailContent");
                             if (view.list_items) {
                                 view.list_items.destroy();
-
                             }
                             if (view.prog) {
                                 view.prog.destroy()
@@ -481,7 +480,7 @@
                                 for (var i in units_list) {
                                     var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
                                     unit_params = (unit_params === null) ? unit_condition : unit_params+"&" + unit_condition;
-                                }                                                                                           console.log("unit_params=",unit_params);
+                                }                                                                                                   console.log("unit_params=",unit_params);
                             } else
                                 unit_params = "unit_id=" + unit_id;
                             getJSONData({
