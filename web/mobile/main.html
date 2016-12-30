@@ -78,15 +78,30 @@
     require(["dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
                 "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
                 "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
-                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button"],
-
+                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button",
+                "calendarView", "pickUnitView"],
             function ( domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
-                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button) {
+                       Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button,
+                       CalendarView, pickUnitView) {
+
+//                console.log("pickUnitView=",pickUnitView, "content="+pickUnitView.content," - ",pickUnitView.content);
+//
+//                //pickUnitView.myalert("pickUnitView");
+//                pickUnitView.myalert2();
+//                pickUnitView.content= "123456789";
+//                pickUnitView.myalert2();
+//                console.log("pickUnitView=",pickUnitView, "content="+pickUnitView.content," - ",pickUnitView.content);
+
+
+
                 moment.locale("uk");
                 numeral.language('ru-UA');
 
                 var view_main = new View({id: "view_main"});
                 document.getElementById('body').appendChild(view_main.domNode);
+
+                var calendarView = new CalendarView( {id:"calendar_view"} );                                             console.log("calendarView=",calendarView);
+
                 view_main.inner_scroll = new ScrollableView({});
                 document.getElementById('body').appendChild(view_main.inner_scroll.domNode);
                 view_main.top_heading_main = new Heading({id:"th_main"});
@@ -137,6 +152,7 @@
                 };
                 pickUnitBtnHeading.addChild(view_main.pickUnitBtn);
                 view_main.setTopButtonsFor = function (view) {
+
                     if (!view.dateBtnHeading) {
                         var dateBtnHeading = new Heading({
                             fixed: "top"});
@@ -149,9 +165,12 @@
                             moveTo: "calendar_view", id: "date_first_" + view.id,
                             transition: "none",
                             onClick: function () {
-                                showCalendarView(this, "Начальная дата", view)
+                                calendarView.setContent(view);
+                                //showCalendarView(this, "Начальная дата", view)
+
                             }
                         });
+
                         view.dateBtnHeading.addChild(view.btnBeginDate);
                         view.btnBeginDate.set("label", view_main.btnBeginDate.label);
                         view.btnBeginDate_dateValue = view_main.btnBeginDate_dateValue;
@@ -164,7 +183,7 @@
                             moveTo: "calendar_view", id: "date_last_" + view.id,
                             transition: "none",
                             onClick: function () {
-                                showCalendarView(this, "Конечная дата", view)
+                                //showCalendarView(this, "Конечная дата", view)
                             }
                         });
                         view.dateBtnHeading.addChild(view.btnEndDate);
@@ -541,34 +560,34 @@
                     var calendar_heading = registry.byId("calendar_heading");
                     var calendar_view = registry.byId("calendar_view");
                     if (!calendar_view) {
-                        var view_div = document.createElement("div");
-                        view_div.setAttribute("id", "calendar_view");
-                        document.getElementById("body").appendChild(view_div);
-                        calendar_view = new View({id: "calendar_view"}, "calendar_view");
-                        calendar_heading = new Heading({
-                            transition: "none",
-                            id: "calendar_heading",
-                            back: "Назад",
-                            moveTo: view.id
-                        });
-                        calendar_view.addChild(calendar_heading);
-                        date_picker = new CalendarLite({
-                            lang: 'ru',
-                            id: "date_picker"
-                        }, "date_picker");
-                        date_picker.startup();
-                        calendar_view.addChild(date_picker);
-                        var accept_heading = new Heading(
-                        );
-                        accept_btn = new ToolBarButton({
-                            style: "width:75px;align",
-                            id: "accept_btn", label: "Выбрать",
-                            transition: "none"
-                        });
-                        accept_heading.addChild(accept_btn);
-                        calendar_view.addChild(accept_heading);
-                        accept_heading.startup();
-                        calendar_view.startup();
+
+//                        var view_div = document.createElement("div");
+//                        view_div.setAttribute("id", "calendar_view");
+//                        document.getElementById("body").appendChild(view_div);
+//                        calendar_view = new View({id: "calendar_view"}, "calendar_view");
+//                        calendar_heading = new Heading({
+//                            transition: "none",
+//                            id: "calendar_heading",
+//                            back: "Назад",
+//                            moveTo: view.id
+//                        });
+//                        calendar_view.addChild(calendar_heading);
+//                        date_picker = new CalendarLite({
+//                            lang: 'ru',
+//                            id: "date_picker"
+//                        }, "date_picker");
+//                        date_picker.startup();
+//                        calendar_view.addChild(date_picker);
+//                        var accept_heading = new Heading();
+//                        accept_btn = new ToolBarButton({
+//                            style: "width:75px;align",
+//                            id: "accept_btn", label: "Выбрать",
+//                            transition: "none"
+//                        });
+//                        accept_heading.addChild(accept_btn);
+//                        calendar_view.addChild(accept_heading);
+//                        accept_heading.startup();
+//                        calendar_view.startup();
                     }
                     var string_date = "" + btn.get("label").substring(6, 10) + "-" + btn.get("label").substring(3, 5) + "-" + btn.get("label").substring(0, 2);
                     date_picker.set("value", string_date);
