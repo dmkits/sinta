@@ -1,6 +1,4 @@
-/**
- * Created by ianagez on 30.12.2016.
- */
+
 define(["dojo/_base/declare", "dojox/mobile/View","dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "dijit/CalendarLite"],
     function(declare, View, Heading, ToolBarButton, CalendarLite) {
         return declare("CalendarView", [View], {
@@ -41,15 +39,9 @@ define(["dojo/_base/declare", "dojox/mobile/View","dojox/mobile/Heading", "dojox
                     var selected_date = moment(instance.date_picker.get("value"));
                     parentDateButton.dateValue = selected_date;
                     parentDateButton.set("label", selected_date.format("DD.MM.YYYY"));
-
-//                        var date1_milsec = new Date(view.btnBeginDate_dateValue).getTime();
-//                        var date2_milsec = new Date(view.btnEndDate_dateValue).getTime();
-//                        if ((date2_milsec - date1_milsec) < 0) {
-//                          var temp=view.btnBeginDate_dateValue;
-//                            view.btnBeginDate_dateValue=view.btnEndDate_dateValue;
-//                            view.btnEndDate_dateValue=temp;
+                    parentView.loadDetailContent(parentView);
                 };
-                //                 view.loadDetailContent();
+
             }
         });
     });

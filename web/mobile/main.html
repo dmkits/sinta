@@ -78,15 +78,29 @@
     require(["dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
                 "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
                 "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
-                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button"],
+                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button",
+                "calendarView", "pickUnitView"],
+            function ( domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
+                       Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button,
+                       CalendarView, pickUnitView) {
 
-            function (domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
-                      Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button) {
+//                console.log("pickUnitView=",pickUnitView, "content="+pickUnitView.content," - ",pickUnitView.content);
+//
+//                //pickUnitView.myalert("pickUnitView");
+//                pickUnitView.myalert2();
+//                pickUnitView.content= "123456789";
+//                pickUnitView.myalert2();
+//                console.log("pickUnitView=",pickUnitView, "content="+pickUnitView.content," - ",pickUnitView.content);
+
+
                 moment.locale("uk");
                 numeral.language('ru-UA');
 
                 var view_main = new View({id: "view_main"});
                 document.getElementById('body').appendChild(view_main.domNode);
+
+                var calendarView = new CalendarView( {id:"calendar_view"} );
+
                 view_main.inner_scroll = new ScrollableView({});
                 view_main.top_heading_main = new Heading({id: "th_main"});
                 view_main.addChild(view_main.top_heading_main, 0);
@@ -167,8 +181,9 @@
 
                 view_main.setTopDateBtn=function(view,id,calendar_heading_str){
                     var btn = new ToolBarButton({id: id, moveTo: "calendar_view", transition: "none"});
+
                     btn.onClick= function () {
-                        view_main.showCalendarView(this, calendar_heading_str, view);
+                        calendarView.setContent(view, this);
                     };
                     view.dateBtnHeading.addChild(btn);
                     btn.startup();
@@ -199,20 +214,20 @@
                     }
                     var today_current_time = moment();
                     if (!view.todayBtn) {
-                            var today_beginning = moment().startOf('day');
+                        var today_beginning = moment().startOf('day');
                         view.todayBtn =  setBottomButtons(tr,view,"Сегодя",today_beginning,today_current_time );
                     }
                     if (!view.yesterdayBtn) {
-                            var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
-                            var yesterday_end = moment().endOf('day').subtract(1, 'days');
+                        var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
+                        var yesterday_end = moment().endOf('day').subtract(1, 'days');
                         view.yesterdayBtn = setBottomButtons(tr,view,"Вчера",yesterday_beginning,yesterday_end );
                     }
                     if (!view.weekBtn) {
-                            var week_beginning = moment().startOf('week');
+                        var week_beginning = moment().startOf('week');
                         view.weekBtn = setBottomButtons(tr,view,"Неделя",week_beginning,today_current_time );
                     }
                     if (!view.monthBtn) {
-                            var month_beginning = moment().startOf('month');
+                        var month_beginning = moment().startOf('month');
                         view.monthBtn = setBottomButtons(tr,view,"Месяц",month_beginning,today_current_time );
 
                     } else {
@@ -224,7 +239,7 @@
                     var btn= new ToolBarButton({
                         view:view,
                         first_date:first_date,
-                    last_date:last_date,
+                        last_date:last_date,
                         style: "padding-left:4px;padding-right:4px; ",
                         label: label,
                         clickable: "true",
@@ -242,10 +257,10 @@
                     return btn;
                 };
                 /*{
-                    "head": "Магазины",
-                    "units":[
-                        { "id": "Bata1", "short_name": "Bata1", "name": "Магазин  БАТА1" }
-                        ,{ "id": "Bata2", "short_name": "Bata2", "name": "Магазин БАТА2" } ]
+                 "head": "Магазины",
+                 "units":[
+                 { "id": "Bata1", "short_name": "Bata1", "name": "Магазин  БАТА1" }
+                 ,{ "id": "Bata2", "short_name": "Bata2", "name": "Магазин БАТА2" } ]
                  }*/
                 view_main.loadMainContent = function () {
                     getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true},
@@ -296,7 +311,7 @@
                     //          20161001    201610131
                     //  var cashbalance = loadMobileDataFromServer("/mobile?action=get_cashbalance&bdate=" + bdate + "&edate=" + edate + unit_params);
                 };
-                view_main.loadDetailContent = function () {
+                view_main.loadDetailContent = function () {                                                             console.log("view_main.loadDetailContent");
                     if (view_main.view_main_list_items) view_main.view_main_list_items.destroy();
                     if (view_main.prog) view_main.prog.destroy();
                     view_main.prog = new ProgressIndicator({size: 200, center: true});
@@ -406,10 +421,10 @@
                     }
                     setPickBtnFor(view, unit_id);
                     view_main.setTopButtonsFor(view);
-                    view.loadDetailContent(view,unit_id );                                                           console.log("actionValue view_main.showDetailView=",actionValue);
+                    view.loadDetailContent(view,unit_id );                                                              console.log("actionValue view_main.showDetailView=",actionValue);
                 };
 
-                function loadDetailContentForView(view,unit_id){                                                        console.log("actionValue loadDetailContentForView=",view);
+                function loadDetailContentForView(view,unit_id){                                                        console.log("loadDetailContentForView");
                     if (view.list_items) view.list_items.destroy();
                     if (view.prog) view.prog.destroy();
                     view.prog = new ProgressIndicator({size: 200, center: true, removeOnStop: true});
@@ -446,12 +461,12 @@
                             });
                 };
                 /* data= [
-                    {"label":"","value":"125",
-                    ,{"label":"","value":"340",
-                    ,{"label":"","value":"600"}
-                    ,{"label":"","value":"-340"}
-                    ,{"label":"","value":"1500"}
-                    , ... ]
+                 {"label":"","value":"125",
+                 ,{"label":"","value":"340",
+                 ,{"label":"","value":"600"}
+                 ,{"label":"","value":"-340"}
+                 ,{"label":"","value":"1500"}
+                 , ... ]
                  */
                 function setDetailContentForView(view, data){
                     view.list_items = new roundRectList({"id": "list" + this.id, style: "position:relative"});
@@ -467,58 +482,6 @@
                         view.list_items.addChild(item);
                     }
                     view.list_items.startup();
-                };
-
-                view_main.showCalendarView = function (btn, heading, view) {
-                    var date_picker = registry.byId("date_picker");
-                    var accept_btn = registry.byId("accept_btn");
-                    var calendar_heading = registry.byId("calendar_heading");
-                    var calendar_view = registry.byId("calendar_view");
-                    if (!calendar_view) {
-                        var view_div = document.createElement("div");
-                        view_div.setAttribute("id", "calendar_view");
-                        document.getElementById("body").appendChild(view_div);
-                        calendar_view = new View({id: "calendar_view"}, "calendar_view");
-                        calendar_heading = new Heading({
-                            transition: "none",
-                            id: "calendar_heading",
-                            back: "Назад",
-                            moveTo: view.id
-                        });
-                        calendar_view.addChild(calendar_heading);
-                        date_picker = new CalendarLite({lang: 'ru', id: "date_picker"}, "date_picker");
-                        date_picker.startup();
-                        calendar_view.addChild(date_picker);
-                        var accept_heading = new Heading();
-                        accept_btn = new ToolBarButton({style: "width:75px;align",id: "accept_btn", label: "Выбрать",transition: "none"});
-                        accept_heading.addChild(accept_btn);
-                        calendar_view.addChild(accept_heading);
-                        accept_heading.startup();
-                        calendar_view.startup();
-                    }
-                    var string_date = "" + btn.get("label").substring(6, 10) + "-" + btn.get("label").substring(3, 5) + "-" + btn.get("label").substring(0, 2);
-                    date_picker.set("value", string_date);
-                    calendar_heading.set("label", heading);
-                    calendar_heading.set("moveTo", view.id);
-                    accept_btn.set("moveTo", view.id);
-                    accept_btn.onClick = function () {
-                        var selected_date = moment(date_picker.get("value"));
-                        btn.set("label", selected_date.format("DD.MM.YYYY"));
-                        if (btn.id == "date_first_" + view.id) {
-                            view.btnBeginDate.dateValue = selected_date;
-                        }
-                        if (btn.id == "date_last_" + view.id) {
-                            view.btnEndDate.dateValue = selected_date;
-                        }
-//                        var date1_milsec = new Date(view.btnBeginDate.dateValue).getTime();
-//                        var date2_milsec = new Date(view.btnEndDate.dateValue).getTime();
-//                        if ((date2_milsec - date1_milsec) < 0) {
-//                          var temp=view.btnBeginDate.dateValue;
-//                            view.btnBeginDate.dateValue=view.btnEndDate.dateValue;
-//                            view.btnEndDate.dateValue=temp;
-//                        }
-                        view.loadDetailContent(view);
-                    }
                 };
                 var showPickUnitView = function (btn, view) {                                                           console.log("btn.units_data=", btn.units_data, "btn.selected_units=", btn.selected_units);
                     var pick_view = registry.byId("pick_unit_view");
