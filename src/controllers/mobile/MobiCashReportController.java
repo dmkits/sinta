@@ -145,7 +145,7 @@ public class MobiCashReportController extends PageController {
                         .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
 
-                DMSimpleQuery.instance("SELECT 'else_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName,  st.StockID AS STOCK_ID," +
+                DMSimpleQuery.instance("SELECT 'other_income'+CAST(st.StockID as varchar(200)) as ID, st.StockName,  st.StockID AS STOCK_ID," +
                         "REPLACE(st.StockName,'Магазин IN UA ','Выручка прочее ') as SHORT_NAME, SUM(m.SumCC_wt) as SUMM\n" +
                         "FROM r_Stocks st\n" +
                         "  LEFT JOIN (\n" +
