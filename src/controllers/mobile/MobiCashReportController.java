@@ -141,7 +141,7 @@ public class MobiCashReportController extends PageController {
                         .replaceResultItemName("SHORT_NAME", "label")
                         .replaceResultItemName("STOCK_ID", "unit_id")
                         .replaceResultItemName("ID", "id")
-                        .addToAllResultItems("action", "cash_detail_view")
+                        .addToAllResultItems("action", "card_detail_view")
                         .addToAllResultItems("url", "/mobile")
                         .addResultToList(outData, "items");
 
