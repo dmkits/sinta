@@ -5,25 +5,25 @@
  * Created by ianagez on 30.12.2016.
  */
 define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ScrollableView", "dojox/mobile/RoundRectList",
-        "dojox/mobile/ListItem", "dojox/mobile/ToolBarButton","dojox/mobile/ProgressIndicator"],
-    function (declare, View, Heading, ScrollableView, RoundRectList, ListItem, ToolBarButton,ProgressIndicator) {
+        "dojox/mobile/ListItem", "dojox/mobile/ToolBarButton", "dojox/mobile/ProgressIndicator"],
+    function (declare, View, Heading, ScrollableView, RoundRectList, ListItem, ToolBarButton, ProgressIndicator) {
         return declare("PickUnitView", [View], {
 
             constructor: function (args, parentName) {
                 declare.safeMixin(this, args);
             },
 
-            id:"",
-            actionValue:"",
-            heading_label:"",
-            view_main:"",
-            unit_id:"",
-            pickUnitView:"",
-            url:"",
+            id: "",
+            actionValue: "",
+            heading_label: "",
+            view_main: "",
+            unit_id: "",
+            pickUnitView: "",
+            url: "",
 
             postCreate: function () {
                 document.getElementById('body').appendChild(this.domNode);
-                var instance=this;
+                var instance = this;
                 this.top_heading = new Heading({
                     label: instance.heading_label,
                     back: "Назад",
@@ -33,17 +33,11 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                 this.addChild(this.top_heading, 0);
 
                 this.inner_scroll = new ScrollableView({});
-               this.setPickBtnFor(this.view_main,this.pickUnitView, this.unit_id);
-               // this.setTopButtonsFor(view);
-               // this.setBottomButtonsFor(view);
+                this.setPickBtnFor(this.view_main, this.pickUnitView, this.unit_id);
                 this.addChild(this.inner_scroll);
-                //this.inner_scroll.startup();
-                //this.startup();
-               // this.setDetailContent = setDetailContentForView;
-               // this.loadDetailContent = loadDetailContentForView;
             },
-            setPickBtnFor:function(view_main,pickUnitView, unit_id){
-                var instance=this;
+            setPickBtnFor: function (view_main, pickUnitView, unit_id) {
+                var instance = this;
                 if (!this.pickUnitBtnHeading) {
                     this.pickUnitBtnHeading = new Heading();
                     var icon_btn = new ToolBarButton({
@@ -53,7 +47,7 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                         iconPos: "0,0,29,29"
                     });
                     this.pickUnitBtnHeading.addChild(icon_btn);
-                    this.addChild(this.pickUnitBtnHeading,1);
+                    this.addChild(this.pickUnitBtnHeading, 1);
                     this.pickUnitBtnHeading.startup();
                 }
                 if (!this.pickUnitBtn) {
@@ -86,11 +80,10 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                 this.pickUnitBtnHeading.addChild(this.pickUnitBtn);
 
                 window.onresize = function () {
-                   // var v = window.innerWidth - 90;
                     instance.pickUnitBtn.set("style", "width:" + v + "px; font-size:14px; align: center");
                 };
             },
-            setDetailContent:function(data){
+            setDetailContent: function (data) {
                 this.list_items = new RoundRectList({"id": "list" + this.id, style: "position:relative"});
                 this.inner_scroll.addChild(this.list_items);
                 this.inner_scroll.scrollTo({x: 0, y: 0});
@@ -106,14 +99,14 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                 this.list_items.startup();
             },
 
-            loadDetailContent:function(view_main,unit_id){
+            loadDetailContent: function (view_main, unit_id) {
                 if (this.list_items) this.list_items.destroy();
                 if (this.prog) this.prog.destroy();
                 this.prog = new ProgressIndicator({size: 200, center: true, removeOnStop: true});
                 document.getElementById('body').appendChild(this.prog.domNode);
                 this.prog.start();
 
-                var actionValue=this.actionValue;
+                var actionValue = this.actionValue;
                 var bdate = this.btnBeginDate.dateValue.format("YYYYMMDD"), edate = this.btnEndDate.dateValue.format("YYYYMMDD");
                 var unit_params = null;
                 if (unit_id == undefined) {
@@ -121,20 +114,22 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                     for (var i in units_list) {
                         var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
                         unit_params = (unit_params === null) ? unit_condition : unit_params + "&" + unit_condition;
-                    }                                                                                                    console.log("loadDetailContentForView unit_params=", unit_params);
+                    }
                 } else
                     unit_params = "unit_id=" + unit_id;
-                    var instance=this;
+                var instance = this;
 
                 getJSONData({//  url: "mobile/cashin_sum.json"
                         url: this.url,
                         condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + "&" + unit_params,
-                        consoleLog: true }
+                        consoleLog: true
+                    }
 
                     , function (success, result) {
                         if (success) {
                             if (result.error) {
-                                view_main.msgBox.innerHTML = "Нет данных";                                               console.log("loadDetailContentForView getJSONData DATA ERROR! error=", result.error);
+                                view_main.msgBox.innerHTML = "Нет данных";
+                                console.log("loadDetailContentForView getJSONData DATA ERROR! error=", result.error);
                                 view_main.dialogWin.show();
                             } else instance.setDetailContent(result.items);
                         } else {
@@ -142,7 +137,8 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                             view_main.dialogWin.show();
                         }
                         instance.prog.stop();
-                    });
+                    }
+                );
             }
         });
     });

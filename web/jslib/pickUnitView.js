@@ -9,7 +9,6 @@ define(["dojo/_base/declare","dojox/mobile/View","dojox/mobile/Heading", "dojox/
             constructor: function (args, parentName) {
                 declare.safeMixin(this, args);
             },
-
             postCreate: function(){
                 this.hide();
                 document.getElementById('body').appendChild(this.domNode);
@@ -86,14 +85,6 @@ define(["dojo/_base/declare","dojox/mobile/View","dojox/mobile/Heading", "dojox/
                         instance.confirmBtn.set("moveTo", null);
                 };
             }
-
-            //content:"PickUnitView",
-            //    myalert: function(msg){
-            //    alert(msg);
-            //},
-            //myalert2: function(){
-            //    alert(this.content);
-            //}
         });
         }
     );
