@@ -41,7 +41,6 @@ define(["dojo/_base/declare", "dojox/mobile/View","dojox/mobile/Heading", "dojox
                     parentDateButton.set("label", selected_date.format("DD.MM.YYYY"));
                     parentView.loadDetailContent(parentView);
                 };
-
             }
         });
     });
