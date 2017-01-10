@@ -204,7 +204,7 @@
                     var today_current_time = moment();
                     if (!view.todayBtn) {
                         var today_beginning = moment().startOf('day');
-                        view.todayBtn =  setBottomButtons(tr,view,"Сегодя",today_beginning,today_current_time );
+                        view.todayBtn =  setBottomButtons(tr,view,"Сегодня",today_beginning,today_current_time );
                     }
                     if (!view.yesterdayBtn) {
                         var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
@@ -230,8 +230,7 @@
                         last_date:last_date,
                         style: "padding-left:4px;padding-right:4px; ",
                         label: label,
-                        clickable: "true",
-                        id: view.id+" "+label
+                        clickable: "true"
                     });
                     btn.onClick = function () {
                         view.btnBeginDate.dateValue=this.first_date;
