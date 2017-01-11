@@ -22,14 +22,13 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
     <content url="jar://$MODULE_DIR$/lib_selenide/gradle-wrapper.jar!/" />
-    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib_db" level="project" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="lib_jetty9" level="project" />
     <orderEntry type="library" name="lib_jetty9_annotations" level="project" />
     <orderEntry type="library" name="lib_jetty9_jsp" level="project" />
-    <orderEntry type="library" name="lib_selenide" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="JUnit4">
         <CLASSES>
