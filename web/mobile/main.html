@@ -366,10 +366,10 @@
                         if (dataItem.url) {
                             list_item.url = dataItem.url;
                         }
-                        if (dataItem.action) {
-                            list_item.actionValue = dataItem.action;
+                        if (dataItem.detail_id) {
+                            list_item.detail_id = dataItem.detail_id;
                             list_item.onClick = function () {
-                                view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.actionValue, this.data_unit_id);
+                                view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.detail_id, this.data_unit_id);
                             }
                         }
                         view_main.view_main_list_items.addChild(list_item);
@@ -379,13 +379,13 @@
                 view_main.onBeforeTransitionIn = function () {
                     view_main.loadDetailContent();
                 };
-                view_main.showDetailView = function (heading_label, id, url, actionValue, unit_id) {
+                view_main.showDetailView = function (heading_label, id, url, detail_id, unit_id) {
                     var view = registry.byId(id);
                     if (!view) {
                         view = new DetailView({
                             view_main:view_main,
                             id: id,
-                            actionValue : actionValue,
+                            detail_id : detail_id,
                             heading_label: heading_label,
                             unit_id : unit_id,
                             pickUnitView:pickUnitView,

@@ -8,19 +8,15 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
         "dojox/mobile/ListItem", "dojox/mobile/ToolBarButton", "dojox/mobile/ProgressIndicator"],
     function (declare, View, Heading, ScrollableView, RoundRectList, ListItem, ToolBarButton, ProgressIndicator) {
         return declare("PickUnitView", [View], {
-
+            id: null,
+            heading_label: "",
+            view_main: null,
+            unit_id: null,
+            pickUnitView: null,
+            detail_id:null,
             constructor: function (args, parentName) {
                 declare.safeMixin(this, args);
             },
-
-            id: "",
-            actionValue: "",
-            heading_label: "",
-            view_main: "",
-            unit_id: "",
-            pickUnitView: "",
-            url: "",
-
             postCreate: function () {
                 document.getElementById('body').appendChild(this.domNode);
                 var instance = this;
@@ -106,7 +102,8 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
                 document.getElementById('body').appendChild(this.prog.domNode);
                 this.prog.start();
 
-                var actionValue = this.actionValue;
+                var detail_condition = "";
+                if (this.detail_id) detail_condition= "&detail_id="+this.detail_id;
                 var bdate = this.btnBeginDate.dateValue.format("YYYYMMDD"), edate = this.btnEndDate.dateValue.format("YYYYMMDD");
                 var unit_params = null;
                 if (unit_id == undefined) {
@@ -121,15 +118,14 @@ define(["dojo/_base/declare", "dojox/mobile/View", "dojox/mobile/Heading", "dojo
 
                 getJSONData({//  url: "mobile/cashin_sum.json"
                         url: this.url,
-                        condition: "action=" + actionValue + "&bdate=" + bdate + "&edate=" + edate + "&" + unit_params,
+                        condition: "action=get_detail_view_data"+detail_condition+ "&bdate=" + bdate + "&edate=" + edate + "&" + unit_params,
                         consoleLog: true
                     }
 
-                    , function (success, result) {
+                    , function (success, result) {                                                                  console.log("loadDetailContentForView getJSONData=", result);
                         if (success) {
                             if (result.error) {
-                                view_main.msgBox.innerHTML = "Нет данных";
-                                console.log("loadDetailContentForView getJSONData DATA ERROR! error=", result.error);
+                                view_main.msgBox.innerHTML = "Нет данных";                                          console.log("loadDetailContentForView getJSONData DATA ERROR! error=", result.error);
                                 view_main.dialogWin.show();
                             } else instance.setDetailContent(result.items);
                         } else {

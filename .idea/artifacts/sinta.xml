@@ -25,6 +25,9 @@
       <element id="file-copy" path="$PROJECT_DIR$/production.properties" />
       <element id="file-copy" path="$PROJECT_DIR$/test.properties" />
       <element id="file-copy" path="$PROJECT_DIR$/sintastart_test.cmd" />
+      <element id="directory" name="scripts">
+        <element id="dir-copy" path="$PROJECT_DIR$/scripts" />
+      </element>
     </root>
   </artifact>
 </component>

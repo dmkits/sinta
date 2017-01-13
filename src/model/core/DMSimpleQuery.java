@@ -1,5 +1,7 @@
 package model.core;
 
+import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +13,15 @@ public class DMSimpleQuery {
     String QUERY = null;
     Object[] PARAMETERS = new Object[]{};
     ArrayList<HashMap<String, Object>> RESULT = null;
+//    public static final Charset UTF = Charset.forName("UTF-8");
 
     private DMSimpleQuery(String QUERY) {
         this.QUERY = QUERY;
     }
 
+    public static DMSimpleQuery instance() {
+        return new DMSimpleQuery(null);
+    }
     public static DMSimpleQuery instance(String sQuery) {
         return new DMSimpleQuery(sQuery);
     }
@@ -104,6 +110,23 @@ public class DMSimpleQuery {
                 resultItem.put(newItemName, resultItem.get(existsItemName));
                 resultItem.remove(existsItemName);
             }
+        }
+        return this;
+    }
+    public DMSimpleQuery load(String path) throws Exception{
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF8"));
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            QUERY = sb.toString();
+        } finally {
+            br.close();
         }
         return this;
     }
