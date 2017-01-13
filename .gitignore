@@ -1,8 +1,6 @@
+.idea/
 .git/
 /out/production/
-/.idea/
-/.gitignore
-!/.gitignore
-!/out/
-!/out/artifacts/
-out/artifacts
+/out/test/
+
+
