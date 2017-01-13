@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>ScrollableView-v-vh-af</title>
+
+    <script type="text/javascript" src="/jslib/dojox/mobile/deviceTheme.js" data-dojo-config="mblThemeFiles: ['base']"></script>
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: false"></script>
+    <!--, mblAlwaysHideAddressBar: true-->
+
+<body id="body" style="width:100%; height: 100%">
+
+    <!--<div id="view1" data-dojo-type="dojox/mobile/ScrollableView">-->
+        <!--<h1 data-dojo-type="dojox/mobile/Heading" data-dojo-props='fixed:"top"'>View Header Bar</h1>-->
+        <!--&lt;!&ndash;...&ndash;&gt;-->
+        <!--<h1 data-dojo-type="dojox/mobile/Heading" data-dojo-props='fixed:"bottom"'>View Footer Bar</h1>-->
+    <!--</div>-->
+
+    <!--<div id="main_view" style="width:100%; height: 100%">-->
+        <!--<div id="main_h"></div>-->
+        <!--<div id="main_h2"></div>-->
+        <!--<div id="main_f"></div>-->
+    <!--</div>-->
+</body>
+<script>
+    require([
+        "dojo/ready",
+        "dijit/registry",
+        "dojox/mobile/ScrollableView",
+        "dojox/mobile/Heading",
+        "dojox/mobile/RoundRectList",
+        "dojox/mobile/ListItem",
+        "dojox/mobile/View"
+    ], function(ready, registry, ScrollableView, Heading, RoundRectList,ListItem, View){
+
+        var view_div= document.createElement('div');
+        view_div.setAttribute("id","view_div");
+        document.getElementById('body').appendChild(view_div);
+
+        var main_sv=document.createElement('div');
+        main_sv.setAttribute("id","main_sv");
+        document.getElementById('body').appendChild(main_sv);
+
+        var main_h3=document.createElement('div');
+        main_h3.setAttribute("id","main_h3");
+        main_sv.appendChild(main_h3);
+
+        var main_f=document.createElement('div');
+        main_f.setAttribute("id","main_f");
+        main_sv.appendChild(main_f);
+
+//                var main_h=document.createElement('div');
+//        main_h.setAttribute("id","main_h");
+//        view_div.appendChild(main_h);
+//
+//        var main_h2=document.createElement('div');
+//        main_h2.setAttribute("id","main_h2");
+//        view_div.appendChild(main_h2);
+
+
+        var view = new View({id:"view_div"},"view_div");
+
+        var sv = new ScrollableView({
+            //height:"300px",
+            //style:"height:100%",
+            id:"main_sv"},"main_sv");
+
+        var rr= new RoundRectList();
+        for(var i=1; i<30; i++){
+            var li = new ListItem({label:"smth "+i});
+            rr.addChild(li);
+        }
+        sv.addChild(rr);
+        rr.startup();
+
+        var h = new Heading( {label:"View Header Bar1"});
+        var h2 = new Heading({label:"View Header Bar2"});
+        view.addChild(h);
+        view.addChild(h2);
+        view.addChild(sv);
+
+        var h3 = new Heading({fixed:"top", label:"View Header Bar"},"main_h3");
+        var f = new Heading({fixed:"bottom", label:"View Footer Bar"},"main_f");
+
+        sv.startup();
+        view.startup();
+    });
+</script>
+</html>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+    <display-name>5eExample</display-name>
+
+    <filter>
+        <filter-name>FileLoadController</filter-name>
+        <filter-class>controllers.FileLoadController</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FileLoadController</filter-name>
+        <url-pattern>*.ico</url-pattern>
+        <url-pattern>*.gif</url-pattern>
+        <url-pattern>*.jpg</url-pattern>
+        <url-pattern>*.png</url-pattern>
+        <url-pattern>*.css</url-pattern>
+        <url-pattern>*.js</url-pattern>
+        <url-pattern>*.json</url-pattern>
+        <url-pattern>*.swf</url-pattern>
+        <url-pattern>*.html</url-pattern>
+    </filter-mapping>
+    <servlet>
+        <servlet-name>FileLoader</servlet-name>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FileLoader</servlet-name>
+        <url-pattern>*.ico</url-pattern>
+        <url-pattern>*.gif</url-pattern>
+        <url-pattern>*.jpg</url-pattern>
+        <url-pattern>*.png</url-pattern>
+        <url-pattern>*.css</url-pattern>
+        <url-pattern>*.js</url-pattern>
+        <url-pattern>*.json</url-pattern>
+        <url-pattern>*.swf</url-pattern>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>AccessController</filter-name>
+        <filter-class>controllers.AccessController</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AccessController</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>MainController</servlet-name>
+        <servlet-class>controllers.MainController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MainController</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MobileController</servlet-name>
+        <servlet-class>controllers.mobile.MobiCashReportController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MobileController</servlet-name>
+        <url-pattern>/mobile</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SysadminController</servlet-name>
+        <servlet-class>controllers.SysadminController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SysadminController</servlet-name>
+        <url-pattern>/sysadmin</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SysadminMainController</servlet-name>
+        <servlet-class>controllers.sysadmin.MainController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SysadminMainController</servlet-name>
+        <url-pattern>/sysadmin/main</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SysadminStartupParametersController</servlet-name>
+        <servlet-class>controllers.sysadmin.StartupParametersController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SysadminStartupParametersController</servlet-name>
+        <url-pattern>/sysadmin/startup_parameters</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SysadminDatabaseController</servlet-name>
+        <servlet-class>controllers.sysadmin.DatabaseController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SysadminDatabaseController</servlet-name>
+        <url-pattern>/sysadmin/database</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MainPageController</servlet-name>
+        <servlet-class>controllers.MainPageController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MainPageController</servlet-name>
+        <url-pattern>/mainpage</url-pattern>
+    </servlet-mapping>
+
+    <jsp-config>
+    </jsp-config>
+</web-app>

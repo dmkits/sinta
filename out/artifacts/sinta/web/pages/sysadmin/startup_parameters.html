@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="sa_startup_params_PageContent" style="width:510px;height:100%; margin:0;padding:0;">
+        <table width="100%" height="100%">
+            <tr><td height="20px">
+                <table width="100%">
+                    <tr>
+                        <th height="30px" width="180px"><b>system startup parameters:</b></th>
+                        <th width="200px"><div id="sa_startup_params_appLocalConfig">default</div></th>
+                        <th></th>
+                    </tr>
+                </table>
+            </td></tr>
+            <tr><td height="1px">
+                <table width="500px">
+                    <tr><td width="70px"><label for="db.engine">db.engine </label></td><td><input id="db.engine" type="text"/></td></tr>
+                    <tr><td><label for="db.driver">db.driver </label></td><td><input id="db.driver" type="text"/></td></tr>
+                    <tr><td><label for="db.driverlib">db.driverlib </label></td><td><input id="db.driverlib" type="text"/></td></tr>
+                    <tr><td><label for="db.Host">db.Host </label></td><td><input id="db.Host" type="text"/></td></tr>
+                    <tr><td><label for="db.Name">db.Name </label></td><td><input id="db.Name" type="text"/></td></tr>
+                    <tr><td><label for="db.Created">db.Created </label></td><td><input id="db.Created" type="text"/></td></tr>
+                    <tr><td><label for="db.DBURL">db.DBURL </label></td><td><input id="db.DBURL" type="text"/></td></tr>
+                    <tr><td><label for="db.user">db.user </label></td><td><input id="db.user" type="text"/></td></tr>
+                    <tr><td><label for="db.password">db.password </label></td><td><input id="db.password" type="text"/></td></tr>
+                </table>
+            </td></tr>
+            <tr><td height="30px">
+                <button id="SA_startup_params_BtnAppLocalConfigLoad">Load settings</button>
+                <button id="SA_startup_params_BtnAppLocalConfigSaveAndReconnect">Store settings & reconnect to database</button>
+            </td></tr>
+            <tr><td></td></tr>
+        </table>
+    </div>
+</body>
+<script type="text/javascript">
+    require(["dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/ContentPane", "dojo/data/ItemFileReadStore",
+                "dijit/form/TextBox", "dijit/form/DateTextBox", "dijit/form/Button", "htable"],
+            function (registry, BorderContainer, LayoutContainer, ContentPane, ItemFileReadStore, TextBox,DateTextBox, Button, htable) {
+                var sa_startup_params_PageContent= initElem(registry, "sa_startup_params_PageContent", "sa_startup_params_PageContent", ContentPane, {});
+                var sa_startup_params_ContentController =
+                        new ContentController({dataIDName:"db.engine", getURL:"/sysadmin/startup_parameters",postURL: "/sysadmin/startup_parameters", stateElementID:null});
+                sa_startup_params_ContentController.addElement("db.engine", initElem(registry, "db.engine", "db.engine", TextBox, {style:"width:100px"}));
+                sa_startup_params_ContentController.addElement("db.driver", initElem(registry, "db.driver", "db.driver", TextBox, {style:"width:300px"}));
+                sa_startup_params_ContentController.addElement("db.driverlib", initElem(registry, "db.driverlib", "db.driverlib", TextBox, {style:"width:400px"}));
+                sa_startup_params_ContentController.addElement("db.Host", initElem(registry, "db.Host", "db.Host", TextBox, {style:"width:150px"}));
+                sa_startup_params_ContentController.addElement("db.Name", initElem(registry, "db.Name", "db.Name", TextBox, {style:"width:150px"}));
+                sa_startup_params_ContentController.addElement("db.Created", initElem(registry, "db.Created", "db.Created", TextBox, {style:"width:100px"}));
+                sa_startup_params_ContentController.addElement("db.DBURL", initElem(registry, "db.DBURL", "db.DBURL", TextBox, {style:"width:420px"}));
+                sa_startup_params_ContentController.addElement("db.user", initElem(registry, "db.user", "db.user", TextBox, {style:"width:100px"}));
+                sa_startup_params_ContentController.addElement("db.password", initElem(registry, "db.password", "db.password", TextBox, {style:"width:100px"}));
+                var SA_startup_params_BtnAppLocalConfigLoad=
+                        initElem(registry, "SA_startup_params_BtnAppLocalConfigLoad", "SA_startup_params_BtnAppLocalConfigLoad", Button, {style:"width:150px"});
+                var SA_startup_params_BtnAppLocalConfigSaveAndReconnect=
+                        initElem(registry, "SA_startup_params_BtnAppLocalConfigSaveAndReconnect", "SA_startup_params_BtnAppLocalConfigSaveAndReconnect",
+                            Button, {style:"width:150px"});
+                /*---actions---*/
+                sa_startup_params_ContentController.loadContent = function(){
+                    var sa_startup_params_appLocalConfig = document.getElementById("sa_startup_params_appLocalConfig");
+                    sa_startup_params_appLocalConfig.innerHTML="<div><b>Loading configuration parameters...</b></div>";
+                    sa_startup_params_ContentController.setDataFromUrl("action=get_app_local_config",
+                            /*postaction*/function(success,data,itemData){
+                                if(success&&itemData) {
+                                    sa_startup_params_appLocalConfig.innerHTML="<div><b>Default configuration parameters loaded!</b></div>";
+                                } else {
+                                    sa_startup_params_appLocalConfig.innerHTML="<div><b style='color:red'>Cannot load configuration parameters! No connection to the server!</b></div>";
+                                }
+                            });
+                };
+                SA_startup_params_BtnAppLocalConfigLoad.onClick = function(){
+                    sa_startup_params_ContentController.loadContent();
+                };
+                SA_startup_params_BtnAppLocalConfigSaveAndReconnect.onClick = function(){
+                    var sa_startup_params_appLocalConfig = document.getElementById("sa_startup_params_appLocalConfig");
+                    sa_startup_params_appLocalConfig.innerHTML="<div><b>Configuration saving and reconnected to database...</b></div>";
+                    sa_startup_params_ContentController.postDataToUrl("action=save_app_local_config_and_reconnect",
+                            /*postaction*/function(success,data, updateCount, resultItemData){
+                                if(success) {
+                                    if (data["error"]) {
+                                        sa_startup_params_appLocalConfig.innerHTML="<div><b style='color:red'>"+data["error"]+"</b></div>";
+                                    } else {
+                                        sa_startup_params_appLocalConfig.innerHTML="<div><b>Default configuration saved.</b></div>";
+                                        var reconnect_result_msg = "";
+                                        if(data.reconnect_result){
+                                            reconnect_result_msg = "<div>Reconnected to: <span  style='text-decoration:underline'>"+data.reconnect_URL+"</span></div>";
+                                        } else {
+                                            if(data.reconnect_error){
+                                                reconnect_result_msg = "<div><b style='color:red'>"+data.reconnect_error+"</b></div>";
+                                            } else {
+                                                reconnect_result_msg = "<div><b style='color:red'>Cannot reconnected to: </b></div>";
+                                            }
+                                        }
+                                        sa_startup_params_appLocalConfig.innerHTML = sa_startup_params_appLocalConfig.innerHTML +" "+ reconnect_result_msg;
+                                    }
+                                    if(sa_startup_params_PageContent.getParent().updateStateInfo) sa_startup_params_PageContent.getParent().updateStateInfo();
+                                } else {
+                                    sa_startup_params_appLocalConfig.innerHTML="<div><b style='color:red'>Cannot save and reconnect to database! No connection to the server!</b></div>";
+                                }
+                            });
+                };
+                /*---initing on load---*/
+                sa_startup_params_ContentController.loadContent();
+            });
+</script>
+</html>

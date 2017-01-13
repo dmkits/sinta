@@ -1,0 +1,27 @@
+{
+  "head": [
+    {
+      "title": "Магазины"
+    }
+  ],
+"units":[
+{"id": "Bata1", "short_name": "Bata1", "name": "Магазин  БАТА1"
+}
+,
+{
+"id": "Bata2", "short_name": "Bata2", "name": "Магазин БАТА2"
+}
+,
+{
+"id": "Bata3", "short_name": "Bata3", "name": "Магазин БАТА3"}
+,
+{
+"id": "Bata4", "short_name": "Bata4", "name": "Магазин БАТА4"
+}
+,
+{
+"id": "Bata5", "short_name": "Bata5", "name": "Новорічний філіал"
+}
+]
+}
+

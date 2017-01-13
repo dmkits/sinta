@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>ScrollableView-v-vh-af</title>
+
+    <script type="text/javascript" src="/jslib/dojox/mobile/deviceTheme.js" data-dojo-config="mblThemeFiles: ['base']"></script>
+    <script type="text/javascript" src="/jslib/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true, mblAlwaysHideAddressBar: true"></script>
+
+    <script type="text/javascript">
+        require([
+            "../jslib/dojo_old/dojox/mobile/parser",
+            "../jslib/dojo_old/dojox/mobile",
+            "../jslib/dojo_old/dojox/mobile/compat",
+            "../jslib/dojo_old/dojox/mobile/ScrollableView"
+        ]);
+    </script>
+
+    <style>
+        .lnk {
+            font-size: 14px;
+            color: #0B5199;
+            text-decoration: none;
+        }
+        html,body{
+            height: 100%;
+            overflow: hidden;
+        }
+        input{
+            width: 200px;
+        }
+    </style>
+</head>
+<body style="visibility:hidden;">
+
+<!--<div id="h_top"></div>-->
+
+<!--<div id="div_view_main" style="height:100%; width:100%">-->
+<!--&lt;!&ndash;<div id="heading_main"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;<ul id="view_main_list_items"></ul>&ndash;&gt;-->
+<!--</div>-->
+
+<!--<div id="h_bottom"></div>-->
+
+</body>
+<script>
+    require([
+        "../jslib/dojo_old/dojox/mobile/compat",
+        "../jslib/dojo_old/dojo/ready",
+        "../jslib/dojo_old/dijit/registry",
+        "../jslib/dojo_old/dojox/mobile/ScrollableView",
+        "../jslib/dojo_old/dojox/mobile/Heading",
+        "../jslib/dojo_old/dojox/mobile/RoundRectList",
+        "../jslib/dojo_old/dojox/mobile/ListItem"
+    ], function(compat, ready, registry, ScrollableView, Heading,RoundRectList,ListItem){
+
+//        var h = new Heading({
+//            style:"position:fixed",
+//            fixed:"top", label:"View Header Bar", id:"top"});
+//        h.placeAt(document.body);
+//
+//        var sv = new ScrollableView({
+//            id:"view_main"});
+//        sv.placeAt(document.body);
+//
+//        var rr= new RoundRectList();
+//        for(var i=0; i<30; i++) {
+//            var li = new ListItem({label: "somthing"});
+//            rr.addChild(li);
+//        }
+//        rr.startup();
+//        sv.addChild(rr);
+//
+//        var f = new Heading({
+//            style:"position:fixed",
+//            fixed:"bottom", label:"View Footer Bar", id:"foot"});
+//        f.placeAt(document.body);
+//        sv.startup();
+
+        var sv = new ScrollableView({id:"view1"});
+        //sv.startup();
+        var h = new Heading({fixed:"top", label:"View Header Bar"});
+        sv.addChild(h);
+        var rr= new RoundRectList();
+        for(var i=0; i<3; i++) {
+            var li = new ListItem({label: "smth"});
+            rr.addChild(li);
+        }
+
+        sv.addChild(rr);
+        var f = new Heading({fixed:"bottom", label:"View Footer Bar"});
+        sv.addChild(f);
+        sv.placeAt(document.body);
+        rr.startup();
+        sv.startup();
+    });
+</script>
+</html>

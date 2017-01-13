@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="mainpage_MainContainer">
+        <div id="mainpage_MainContent">
+            <table style="width: 100%; height: 100%; background: url('/imgs/bata.jpg'); background-repeat: no-repeat;">
+                <tr><td></td></tr>
+            </table>
+        </div>
+</div>
+</body>
+<script type="text/javascript">
+    require(["dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/LayoutContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
+                "dijit/form/ToggleButton", "dojo/domReady!"],
+            function (registry, BorderContainer, LayoutContainer, TabContainer, ContentPane,
+                      ToggleButton) {
+                var mainpage_MainContainer = initElem(null, "mainpage_MainContainer", "mainpage_MainContainer", BorderContainer, {design: "headline"});
+                var mainpage_MainContent = initElem(null, "mainpage_MainContent", "mainpage_MainContent", ContentPane, {region: "center"});
+            });
+</script>
+</html>

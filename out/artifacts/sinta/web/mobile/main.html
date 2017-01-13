@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<!--xmlns="http://www.w3.org/1999/xhtml"-->
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="/icons/heart16.ico"/>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+    <!--<meta name="apple-mobile-web-app-capable" content="yes"/>-->
+
+    <link href="/jslib/dojox/mobile/themes/iphone/iphone.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/jslib/dojox/widget/Calendar/Calendar.css">
+    <link rel="stylesheet" href="/jslib/dojox/calendar/themes/claro/Calendar.css">
+    <link href="/jslib/dijit/themes/claro/claro.css" rel="stylesheet" type="text/css">
+    <!--<script type="text/javascript" src="/jslib/dojox/mobile/deviceTheme.js"></script>-->
+    <script src="/jslib/myutils.js"></script>
+    <script src="/jslib/mainutils.js"></script>
+    <script src="/jslib/handsontable/moment/moment-with-locales.js"></script>
+    <script src="/jslib/handsontable/numeral/numeral.js"></script>
+    <script src="/jslib/handsontable/numeral/languages/ru-UA.js"></script>
+    <script type="text/javascript" src="/jslib/dojo/dojo.js"
+            data-dojo-config="async: true, parseOnLoad: false"></script>
+    <!--<script src="/jslib/dijit/dijit.js"></script>-->
+
+    <title></title>
+    <style>
+        .claro table.dijitCalendarContainer {
+            margin: 25px auto;
+        }
+
+        .mblTooltipBubble {
+            overflow: visible;
+            padding: 3px;
+        . mblTooltipBubble-styles;
+        }
+
+        #date_picker {
+            text-align: center;
+            position: relative;
+            font-size: 1.5em;
+            font-weight: lighter;
+        }
+
+        #view_main_detail_btn {
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            height: 29px;
+            line-height: 29px;
+            text-align: center;
+            font-family: Helvetica;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 1);
+            font-size: 13px;
+            font-weight: bold;
+            vertical-align: middle;
+
+            border-width: 1px;
+            border-style: solid;
+            border-color: #2f3740 #405a7e #375073 #3a4755;
+            -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.305);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.305);
+
+            color: #ffffff;
+            background-color: #5877a2;
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#222222), to(#4a6c9b), color-stop(0.02, #8ea4c1), color-stop(0.5, #5877a2), color-stop(0.5, #476999));
+            background-image: linear-gradient(to bottom, #222222 0%, #8ea4c1 2%, #5877a2 50%, #476999 50%, #4a6c9b 100%);
+        }
+    </style>
+</head>
+<body id="body" class="claro" style="width:100%; height: 100%">
+</body>
+<script>
+    require(["dojo/dom-construct", "dojo/_base/xhr", "dojox/mobile", "dojox/mobile/parser", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/RoundRectList",
+                "dojox/mobile/ListItem", "dojo/parser", "dojo/ready", "dojox/mobile/ToolBarButton",
+                "dijit/registry", "dojox/mobile/Tooltip", "dijit/CalendarLite", "dojox/mobile/IconItem", "dojox/mobile/IconContainer",
+                "dojox/mobile/ToggleButton", "dojox/mobile/ScrollableView", "dojox/mobile/ProgressIndicator", "dojox/mobile/SimpleDialog", "dojox/mobile/Button",
+                "calendarView", "pickUnitView", "detailView"],
+            function ( domConstruct, xhr, mobile, mparser, View, Heading, roundRectList, ListItem, parser, ready, ToolBarButton, registry,
+                       Tooltip, CalendarLite, IconItem, IconContainer, ToggleButton, ScrollableView, ProgressIndicator, SimpleDialog, Button,
+                       CalendarView, PickUnitView, DetailView) {
+                moment.locale("uk");
+                numeral.language('ru-UA');
+
+                var view_main = new View({id: "view_main"});
+                document.getElementById('body').appendChild(view_main.domNode);
+
+                var calendarView = new CalendarView( {id:"calendar_view"} );
+                var pickUnitView = new PickUnitView({id:"pick_unit_view"});
+
+                view_main.inner_scroll = new ScrollableView({});
+                view_main.top_heading_main = new Heading({id: "th_main"});
+                view_main.addChild(view_main.top_heading_main, 0);
+                var pickUnitBtnHeading = new Heading({id: "pubtn_h"});
+                var icon_btn = new ToolBarButton({
+                    preventTouch: true,
+                    clickable: false,
+                    icon: "/icons/hearts29x29.ico",
+                    iconPos: "0,0,29,29"
+                });
+                if (!view_main.dialogWin) {
+                    view_main.dialogWin = new SimpleDialog({
+                        id: "dialogWin"
+                    });
+                    document.getElementById('body').appendChild(view_main.dialogWin.domNode);
+                }
+                if (!view_main.msgBox) {
+                    view_main.msgBox = domConstruct.create("div",
+                            {class: "mblSimpleDialogText"},
+                            view_main.dialogWin.domNode);
+                }
+                if (!view_main.cancelBtn)
+                    view_main.cancelBtn = new Button({
+                        class: "mblSimpleDialogButton mblRedButton",
+                        innerHTML: "Ok"
+                    });
+                view_main.cancelBtn.connect(view_main.cancelBtn.domNode, "click",
+                        function (e) {
+                            view_main.dialogWin.hide()
+                        });
+                view_main.cancelBtn.placeAt(view_main.dialogWin.domNode);
+                pickUnitBtnHeading.addChild(icon_btn);
+                view_main.addChild(pickUnitBtnHeading);
+                view_main.addChild(view_main.inner_scroll);
+                var v = window.innerWidth - 90;
+                view_main.pickUnitBtn = new ToolBarButton({
+                    style: "width:" + v + "px; font-size:14px; align: center",
+                    transition: "none",
+                    moveTo: "pick_unit_view",
+                    onClick: function () {
+                        pickUnitView.setContent(this,view_main);
+                    }
+                });
+                window.onresize = function () {
+                   var  v = window.innerWidth - 90;
+                    view_main.pickUnitBtn.set("style", "width:" + v + "px; font-size:14px; align: center");
+                };
+                pickUnitBtnHeading.addChild(view_main.pickUnitBtn);
+
+                view_main.setTopButtonsFor = function (view) {
+                    if (!view.dateBtnHeading) {
+                        var dateBtnHeading = new Heading({fixed: "top"});
+                        dateBtnHeading.startup();
+                        view.dateBtnHeading = dateBtnHeading;
+                        view.inner_scroll.domNode.appendChild(view.dateBtnHeading.domNode);
+                    }
+                    if (!view.btnBeginDate)
+                        view.btnBeginDate = view_main.setTopDateBtn(view,"date_first_" + view.id,"Начальная дата");
+                    view.btnBeginDate.set("label", view_main.btnBeginDate.label);
+                    view.btnBeginDate.dateValue = view_main.btnBeginDate.dateValue;
+
+                    if (!view.btnEndDate)
+                        view.btnEndDate = view_main.setTopDateBtn(view, "date_last_" + view.id, "Конечная дата");
+                    view.btnEndDate.set("label", view_main.btnEndDate.label);
+                    view.btnEndDate.dateValue = view_main.btnEndDate.dateValue;
+
+                    if (!view_main.detailBtn) {
+                        view_main.detailBtn = new ToggleButton({
+                            label: "Детально",
+                            id: view_main.id + "_detail_btn",
+                            onClick: function () {
+                                view_main.loadDetailContent()
+                            }
+                        });
+                        view_main.dateBtnHeading.addChild(view_main.detailBtn);
+                    }
+                };
+
+                view_main.setTopDateBtn=function(view,id){
+                    var btn = new ToolBarButton({id: id, moveTo: "calendar_view", transition: "none"});
+
+                    btn.onClick= function () {
+                        calendarView.setContent(view, this);
+                    };
+                    view.dateBtnHeading.addChild(btn);
+                    btn.startup();
+                    return btn;
+                };
+
+                view_main.setBottomButtonsFor = function (view) {
+                    var tr = registry.byId(view.id + "hfbh");
+                    var bottomHeading = registry.byId(view.id + "hf");
+                    if (!bottomHeading) {
+                        bottomHeading = new Heading({fixed: "bottom"}, view.id + "hf");
+                        document.getElementById('body').appendChild(bottomHeading.domNode);
+
+                        view.inner_scroll.domNode.appendChild(bottomHeading.domNode);
+                        bottomHeading.startup();
+                    }
+                    if (!tr) {
+                        var table = document.createElement('table');
+                        table.setAttribute("align", "center");
+                        var tbody = document.createElement('tbody');
+                        var tr = document.createElement('tr');
+                        var td = document.createElement('td');
+                        td.setAttribute("aling", "center");
+                        bottomHeading.domNode.appendChild(table);
+                        table.appendChild(tbody);
+                        tbody.appendChild(tr);
+                        tr.appendChild(td);
+                    }
+                    var today_current_time = moment();
+                    if (!view.todayBtn) {
+                        var today_beginning = moment().startOf('day');
+                        view.todayBtn =  setBottomButtons(tr,view,"Сегодня",today_beginning,today_current_time );
+                    }
+                    if (!view.yesterdayBtn) {
+                        var yesterday_beginning = moment().startOf('day').subtract(1, 'days');
+                        var yesterday_end = moment().endOf('day').subtract(1, 'days');
+                        view.yesterdayBtn = setBottomButtons(tr,view,"Вчера",yesterday_beginning,yesterday_end );
+                    }
+                    if (!view.weekBtn) {
+                        var week_beginning = moment().startOf('week');
+                        view.weekBtn = setBottomButtons(tr,view,"Неделя",week_beginning,today_current_time );
+                    }
+                    if (!view.monthBtn) {
+                        var month_beginning = moment().startOf('month');
+                        view.monthBtn = setBottomButtons(tr,view,"Месяц",month_beginning,today_current_time );
+
+                    } else {
+                        view.btnBeginDate.set("label", view_main.btnBeginDate.label);
+                        view.btnEndDate.set("label", view_main.btnEndDate.label);
+                    }
+                };
+                var setBottomButtons= function(tr,view,label,first_date,last_date){
+                    var btn= new ToolBarButton({
+                        first_date:first_date,
+                        last_date:last_date,
+                        style: "padding-left:4px;padding-right:4px; ",
+                        label: label,
+                        clickable: "true"
+                    });
+                    btn.onClick = function () {
+                        view.btnBeginDate.dateValue=this.first_date;
+                        view.btnEndDate.dateValue=this.last_date;
+                        view.btnBeginDate.set("label", this.first_date.format("DD.MM.YYYY"));
+                        view.btnEndDate.set("label", this.last_date.format("DD.MM.YYYY"));
+                        view.loadDetailContent(view_main);
+                    };
+                    tr.appendChild(btn.domNode);
+                    btn.startup();
+                    return btn;
+                };
+                /*{
+                 "head": "Магазины",
+                 "units":[
+                 { "id": "Bata1", "short_name": "Bata1", "name": "Магазин  БАТА1" }
+                 ,{ "id": "Bata2", "short_name": "Bata2", "name": "Магазин БАТА2" } ]
+                 }*/
+                view_main.loadMainContent = function () {
+                    getJSONData({url: "/mobile", condition: "action=get_units", consoleLog: true},
+                            function (success, result) {
+                                if (success) {
+                                    if (result.error) {
+                                        view_main.msgBox.innerHTML = "Нет данных";
+                                        view_main.dialogWin.show();
+                                    } else view_main.setMainContent(result);
+                                } else {//error!!!
+                                    view_main.msgBox.innerHTML = "Нет связи с сервером";
+                                    view_main.dialogWin.show();
+                                }
+                                view_main.prog.stop();
+                            }
+                    );
+                };
+
+                view_main.setMainContent = function (maindata) {
+                    view_main.first_header_string = maindata.head;
+                    view_main.top_heading_main.set("label", view_main.first_header_string);
+                    view_main.pickUnitBtn.units_data = maindata.units;
+                    view_main.pickUnitBtn.selected_units = [];
+                    view_main.string_units="";
+                    for(var k=0; k<view_main.pickUnitBtn.units_data.length; k++){
+                        view_main.pickUnitBtn.selected_units[k] = view_main.pickUnitBtn.units_data[k];
+                        view_main.string_units=view_main.string_units+view_main.pickUnitBtn.selected_units[k].short_name;
+                        if(k<view_main.pickUnitBtn.units_data.length-1){
+                            view_main.string_units=view_main.string_units + " | ";
+                        }
+                    }
+                    view_main.pickUnitBtn.set("label", view_main.string_units);
+                    view_main.setTopButtonsFor(view_main);
+                    view_main.setBottomButtonsFor(view_main);
+                    view_main.inner_scroll.startup();
+                    view_main.startup();
+                    if (maindata.mode.indexOf("test") !== -1) {
+                        var test_btn = new ToolBarButton({
+                            icon: "/icons/exclamation-mark29x29.ico",
+                            iconPos: "0,0,29,29",
+                            style: "float:right",
+                            onClick: function () {
+                                view_main.msgBox.innerHTML = maindata.mode;
+                                view_main.dialogWin.show();
+                            }
+                        });
+                        view_main.top_heading_main.addChild(test_btn);
+                    }
+                    if (!view_main.btnBeginDate.label) view_main.todayBtn.onClick();
+                };
+                view_main.loadDetailContent = function () {
+                    if (view_main.view_main_list_items) view_main.view_main_list_items.destroy();
+                    if (view_main.prog) view_main.prog.destroy();
+                    view_main.prog = new ProgressIndicator({size: 200, center: true});
+                    document.getElementById('body').appendChild(view_main.prog.domNode);
+                    view_main.prog.start();
+
+                    var bdate = view_main.btnBeginDate.dateValue.format("YYYYMMDD");
+                    var edate = view_main.btnEndDate.dateValue.format("YYYYMMDD");
+                    var detail = (view_main.detailBtn.get("checked")) ? "&detail" : "";
+                    var units_list = view_main.pickUnitBtn.selected_units;
+                    var unit_params = null;
+                    for (var i in units_list) {
+                        var unit_condition = "unit_" + i + "_id=" + units_list[i].id;
+                        unit_params = (unit_params === null) ? unit_condition : unit_params + "&" + unit_condition;
+                    }
+                    getJSONData({
+                                url: "/mobile",
+                                condition: "action=get_main_data&bdate=" + bdate + "&edate=" + edate + "&" + unit_params + detail,
+                                consoleLog: true
+                            }
+                            , function (success, result) {
+                                if (success) {                                                                          console.log("view_main.loadDetailContent getJSONData result=", result);
+                                    var data=[];
+                                    if (result.items) data=result.items;
+                                    if (result.error) {
+                                        view_main.msgBox.innerHTML = "Нет данных";                                      console.log("view_main.loadDetailContent getJSONData DATA ERROR! error=", result.error);
+                                        view_main.dialogWin.show();
+                                    }
+                                    view_main.setDetailContent(data);
+                                } else {//error!!!
+                                    view_main.msgBox.innerHTML = "Нет связи с сервером";
+                                    view_main.dialogWin.show();
+                                }
+                                view_main.prog.stop();
+                            }
+                    );
+                };
+                view_main.setDetailContent = function (detail_data) {
+                    if(view_main.view_main_list_items) view_main.view_main_list_items.destroy();
+                    view_main.view_main_list_items = new roundRectList({style: "position:relative","id": "view_main_list_items"});
+                    view_main.inner_scroll.scrollTo({x: 0, y: 0});
+                    view_main.inner_scroll.addChild(view_main.view_main_list_items);
+                    view_main.view_main_list_items.startup();
+                    for (var i in detail_data) {
+                        var dataItem = detail_data[i], listItemIdPrefix = "mainListItem_";
+                        var string_value = numeral(dataItem.value).format('0,0');
+                        var list_item = new ListItem({
+                            id: listItemIdPrefix + dataItem.id,
+                            label: dataItem.label,
+                            data_unit_id: dataItem.unit_id,
+                            rightText: string_value,
+                            moveTo: "view_" + dataItem.id,
+                            transition: "none"
+                        });
+                        if (dataItem.icon) {
+                            list_item.set("icon", dataItem.icon);
+                            list_item.set("iconPos", "0,0,29,29");
+                        }
+                        if (dataItem.style) {
+                            list_item.set("style", dataItem.style);
+                        }
+                        if (!dataItem.style) {
+                            list_item.set("style", "background-color:white")
+                        }
+                        if (dataItem.url) {
+                            list_item.url = dataItem.url;
+                        }
+                        if (dataItem.detail_id) {
+                            list_item.detail_id = dataItem.detail_id;
+                            list_item.onClick = function () {
+                                view_main.showDetailView(view_main.first_header_string + " - " + this.label, this.moveTo, this.url, this.detail_id, this.data_unit_id);
+                            }
+                        }
+                        view_main.view_main_list_items.addChild(list_item);
+                        list_item.startup();
+                    }
+                };
+                view_main.onBeforeTransitionIn = function () {
+                    view_main.loadDetailContent();
+                };
+                view_main.showDetailView = function (heading_label, id, url, detail_id, unit_id) {
+                    var view = registry.byId(id);
+                    if (!view) {
+                        view = new DetailView({
+                            view_main:view_main,
+                            id: id,
+                            detail_id : detail_id,
+                            heading_label: heading_label,
+                            unit_id : unit_id,
+                            pickUnitView:pickUnitView,
+                            url:url
+                        });
+                        view_main.setTopButtonsFor(view);
+                        view_main.setBottomButtonsFor(view);
+                        view.inner_scroll.startup();
+                        view.startup();
+                    } else {
+                    view.setPickBtnFor(view_main,pickUnitView, unit_id);
+                    view_main.setTopButtonsFor(view);
+                    }
+                    view.loadDetailContent(view_main,unit_id );
+                };
+                view_main.loadMainContent();
+            });
+</script>
+</html>
