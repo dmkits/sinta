@@ -16,6 +16,7 @@ import java.util.Properties;
  *
  * @author dmk.dp.ua 2014-03-24
  */
+//C:\Users\ianagez\sinta_13.12\src\model\core\DBUserSession.java
 public class DBUserSession {
 
     public static final String DBENGINE = "db.engine";

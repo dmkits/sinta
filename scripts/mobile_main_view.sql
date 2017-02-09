@@ -24,7 +24,8 @@ SELECT 'cash_income' as id, 'Выручка нал' as label,'cash' as DETAIL_ID
     INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID
         WHERE pays.PayformCode=1 AND returns.DocDate BETWEEN @BDATE   AND @EDATE
          AND @StocksList like '% '+CAST(returns.StockID as varchar(200))+' %'
- ) as CASH_INCOME
+ ) as value
+ --CASH_INCOME
 
  UNION ALL
 SELECT  'card_income' as id,  'Выручка ПК' as label,'card' as DETAIL_ID,
@@ -39,24 +40,25 @@ SELECT  'card_income' as id,  'Выручка ПК' as label,'card' as DETAIL_ID
     INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID
         WHERE pays.PayformCode=2 AND returns.DocDate BETWEEN @BDATE  AND @EDATE
         AND @StocksList like '% '+CAST(returns.StockID as varchar(200))+' %'
- )as CARD_INCOME
+ )as value
+ --CARD_INCOME
 
 UNION ALL
 SELECT 'other_income' as id, 'Выручка прочее' as label,  'other' as DETAIL_ID,
-  COALESCE(
-    ( SELECT SUM(pays.SumCC_wt)
+
+     (SELECT COALESCE(SUM(pays.SumCC_wt),0)
         FROM t_SalePays pays
     INNER JOIN t_Sales sales ON sales.ChID=pays.ChID
-      WHERE NOT pays.PayformCode in (1,2)
+      WHERE NOT pays.PayformCode  in (1,2)
       AND sales.DocDate BETWEEN @BDATE  AND @EDATE
       AND @StocksList like '% '+CAST(sales.StockID as varchar(200))+' %'
  )
-  - (SELECT sum(pays.SumCC_wt)
+  - (SELECT COALESCE (sum(pays.SumCC_wt),0)
       FROM t_CRRetPays pays
   INNER JOIN t_CRRet returns ON returns.ChID=pays.ChID
-      WHERE pays.PayformCode!=2 AND pays.PayformCode!=1
+       WHERE NOT pays.PayformCode  in (1,2)
        AND returns.DocDate BETWEEN @BDATE  AND @EDATE
        AND @StocksList like '% '+CAST(returns.StockID as varchar(200))+' %'
-        )
-  ,0) as OTHER_INCOME
+        ) as value
+  --OTHER_INCOME
 

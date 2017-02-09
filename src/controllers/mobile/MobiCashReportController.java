@@ -26,10 +26,11 @@ public class MobiCashReportController extends PageController {
             setModeTo(outData);
             //outData.put("head", addStrParameter("title","Магазины") );
             try {
-                DMSimpleQuery.instance(
-                        "select StockID,StockName, REPLACE(StockName,'Магазин IN UA ','') as SHORT_NAME, "
-                                + " StockID , StockName "
-                                + "from r_Stocks where StockID>0 and StockID<10")
+//                DMSimpleQuery.instance(
+//                        "select StockID,StockName, REPLACE(StockName,'Магазин IN UA ','') as SHORT_NAME, "
+//                                + " StockID , StockName "
+//                                + "from r_Stocks where StockID>0 and StockID<10")
+                DMSimpleQuery.instance().load("scripts/mobile_units.sql")
                         .select(getSessionDBUS(session))
                         .replaceResultItemName("SHORT_NAME", "short_name")
                         .replaceResultItemName("StockID", "id")

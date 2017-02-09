@@ -2,5 +2,4 @@
 .git/
 /out/production/
 /out/test/
-
-
+!/out/artifacts/

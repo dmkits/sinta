@@ -261,7 +261,7 @@
                                     view_main.msgBox.innerHTML = "Нет связи с сервером";
                                     view_main.dialogWin.show();
                                 }
-                                view_main.prog.stop();
+                                if(view_main.prog) view_main.prog.stop();
                             }
                     );
                 };
@@ -332,7 +332,8 @@
                                     view_main.msgBox.innerHTML = "Нет связи с сервером";
                                     view_main.dialogWin.show();
                                 }
-                                view_main.prog.stop();
+                               if(view_main.prog) view_main.prog.stop();
+
                             }
                     );
                 };
